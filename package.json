@@ -3,10 +3,12 @@
     "version": "1.0.0",
     "author": "the awesome engineering company",
     "license": "(c) 2018, The Awesome Engineering Company, inc",
-    "contributors": [{
-        "name": "Glen R. Goodwin"
-    }],
-	"main": "./src/AwesomeConfig.js",
+    "contributors": [
+        {
+            "name": "Glen R. Goodwin"
+        }
+    ],
+    "main": "./src/AwesomeConfig.js",
     "engines": {
         "node": ">=10.5.0"
     },
@@ -16,6 +18,5 @@
     "devDependencies": {
         "mocha": "*"
     },
-    "optionalDependencies": {
-    }
+    "optionalDependencies": {}
 }
