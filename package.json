@@ -6,11 +6,11 @@
     "contributors": [{
         "name": "Glen R. Goodwin"
     }],
+	"main": "./src/AwesomeConfig.js",
     "engines": {
         "node": ">=10.5.0"
     },
     "dependencies": {
-        "colors": "*",
         "lodash": "^4.17.10"
     },
     "devDependencies": {
