@@ -10,14 +10,14 @@ const AwesomeUtils = require("AwesomeUtils");
 const Log = require("AwesomeLog");
 
 const ConfigSource = require("./ConfigSource");
-const AbstractParser = require("./AbstractParser");
-const DefaultParser = require("./DefaultParser");
-const AbstractResolver = require("./AbstractResolver");
-const DefaultResolver = require("./DefaultResolver");
+const ConfigParser = require("./ConfigParser");
+const ConfigResolver = require("./ConfigResolver");
 
 const $CONFIG = Symbol("config");
 const $OPTIONS = Symbol("options");
 const $SOURCES = Symbol("sources");
+const $PARSER = Symbol("parser");
+const $RESOLVER = Symbol("resolver");
 
 /**
  * The AwesomeConfig class, which is instantiated and returned whenever you
@@ -59,18 +59,11 @@ class AwesomeConfig {
 	constructor(options) {
 		this[$OPTIONS] = Object.assign({
 			paths: [],
-			parser: null,
-			parserOptions: null,
-			resolver: null,
-			resolverOptions: null,
 			fileEncoding: "utf-8"
 		},options);
 
-		if (this.parser===null) this[$OPTIONS].parser = new DefaultParser(this.options.parserOptions||{});
-		if (!(this.options.parser instanceof AbstractParser)) throw new Error("Invalid parser option.");
-
-		if (this.resolver===null) this[$OPTIONS].resolver = new DefaultResolver(this.options.resolverOptions||{});
-		if (!(this.options.resolver instanceof AbstractResolver)) throw new Error("Invalid resolver option.");
+		this[$PARSER] = new ConfigParser();
+		this[$RESOLVER] = new ConfigResolver();
 
 		this[$CONFIG] = null;
 		this[$SOURCES] = [];
@@ -97,32 +90,16 @@ class AwesomeConfig {
 		});
 	}
 
-	static get AbstractParser() {
-		return AbstractParser;
-	}
-
-	static get DefaultParser() {
-		return DefaultParser;
-	}
-
-	static get AbstractResolver() {
-		return AbstractResolver;
-	}
-
-	static get DefaultResolver() {
-		return DefaultResolver;
-	}
-
 	get options() {
 		return this[$OPTIONS];
 	}
 
 	get parser() {
-		return this[$OPTIONS].parser;
+		return this[$PARSER];
 	}
 
 	get resolver() {
-		return this[$OPTIONS].resolver;
+		return this[$RESOLVER];
 	}
 
 	/**
@@ -223,19 +200,21 @@ class AwesomeConfig {
 	 * @param {(object|string)} content         [description]
 	 * @param {string}
 	 */
-	add(content,conditions="") {
+	add(content,defaultConditions="") {
 		if (!content) throw new Error("Missing configuration content.");
-		if (conditions===null || conditions===undefined) throw new Error("Missing conditions.");
-		if (typeof conditions!=="string") throw new Error("Invalid conditions.");
+		if (defaultConditions===null || defaultConditions===undefined) throw new Error("Missing defaultConditions.");
+		if (typeof defaultConditions!=="string") throw new Error("Invalid defaultConditions.");
 
-		conditions = parseConditions.call(this,conditions);
+		defaultConditions = parseConditions.call(this,defaultConditions);
 
 		let origin = null;
+		let sources = [];
 
 		let valid = false;
 		if (Lodash.isPlainObject(content)) {
 			valid = true;
 			origin = AwesomeUtils.Module.sourceAndLine(1);
+			sources = sources.concat([new ConfigSource(origin,content,defaultConditions)]);
 		}
 		else if (typeof content==="string") {
 			let stat = null;
@@ -247,26 +226,26 @@ class AwesomeConfig {
 			}
 			if (!stat) {
 				origin = AwesomeUtils.Module.sourceAndLine(1);
-				content = this.parser.parse(content);
+				sources = sources.concat(this.parser.parse(origin,content,defaultConditions));
 				if (content) valid = true;
 			}
 			else if (stat && stat.isDirectory()) {
 				let dir = content;
 				FS.readdir(content).forEach((filename)=>{
 					filename = Path.resolve(dir,filename);
-					if (filename.endsWith(".cfg")) this.add(filename);
+					if (filename.endsWith(".cfg")) this.add(filename,defaultConditions);
 				});
 			}
 			else if (stat && stat.isFile()) {
 				origin = content;
 				content = FS.readFileSync(content,this.options.fileEncoding);
-				content = this.parser.parse(content);
+				sources = sources.concat(this.parser.parse(origin,content,defaultConditions));
 				if (content) valid = true;
 			}
 		}
 		if (!valid) throw new Error("Invalid configuration content.");
 
-		this[$SOURCES].push(new ConfigSource(origin,content,conditions));
+		this[$SOURCES] = this[$SOURCES].concat(sources);
 
 		Log.info && Log.info("AwesomeConfig","Added configuration from "+origin);
 	}

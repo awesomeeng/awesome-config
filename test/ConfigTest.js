@@ -91,17 +91,16 @@ describe("Config",function(){
 			# asdf sd
 		`);
 		config.start();
-		console.log(config);
 		assert.strictEqual(Object.keys(config).length,3);
 		assert.strictEqual(config.one,1);
 		assert.strictEqual(config.two,2);
 		assert.strictEqual(config.three.four,34);
 	});
 
-	// it("add filename",function(){
-	// 	config.add(AwesomeUtils.Module.resolve(module,"./test.cfg"));
-	// });
-	//
+	it("add filename",function(){
+		config.add(AwesomeUtils.Module.resolve(module,"./test.cfg"));
+	});
+
 	// it("add directory",function(){
 	// 	config.add(AwesomeUtils.Module.resolve(module,"./test.cfg"));
 	// });

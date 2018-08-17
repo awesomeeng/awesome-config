@@ -2,11 +2,8 @@
 
 "use strict";
 
-const AbstractResolver = require("./AbstractResolver");
-
-class DefaultResolver extends AbstractResolver {
-	constructor(options) {
-		super(options);
+class DefaultResolver {
+	constructor() {
 	}
 
 	resolve(config) {
