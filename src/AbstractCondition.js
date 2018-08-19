@@ -2,6 +2,10 @@
 
 "use strict";
 
+const ConfigConditionParser = require("./ConfigConditionParser");
+
+const parser = new ConfigConditionParser();
+
 class AbstractCondition {
 	constructor() {
 
@@ -14,6 +18,17 @@ class AbstractCondition {
 	toString() {
 		throw new Error("Not implemented. AbstractCondition requires this method be implemented.");
 	}
+
+	static parse(s) {
+		if (!s) return [];
+		if (typeof s!=="string") throw new Error("Invalid conditions.");
+
+		s = s.trim();
+		if (s==="") return [];
+
+		return parser.parse(s);
+	}
 }
+
 
 module.exports = AbstractCondition;

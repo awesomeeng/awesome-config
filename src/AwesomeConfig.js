@@ -205,8 +205,6 @@ class AwesomeConfig {
 		if (defaultConditions===null || defaultConditions===undefined) throw new Error("Missing defaultConditions.");
 		if (typeof defaultConditions!=="string") throw new Error("Invalid defaultConditions.");
 
-		defaultConditions = parseConditions.call(this,defaultConditions);
-
 		let origin = null;
 		let sources = [];
 
@@ -231,9 +229,11 @@ class AwesomeConfig {
 			}
 			else if (stat && stat.isDirectory()) {
 				let dir = content;
-				FS.readdir(content).forEach((filename)=>{
+				FS.readdirSync(content).forEach((filename)=>{
 					filename = Path.resolve(dir,filename);
 					if (filename.endsWith(".cfg")) this.add(filename,defaultConditions);
+					sources = [];
+					valid = true;
 				});
 			}
 			else if (stat && stat.isFile()) {
@@ -250,16 +250,5 @@ class AwesomeConfig {
 		Log.info && Log.info("AwesomeConfig","Added configuration from "+origin);
 	}
 }
-
-/**
- * Internal utility for parsing a conditions string.
- *
- * @param  {[type]} conditions [description]
- * @return {[type]}            [description]
- */
-const parseConditions = function parseConditions(conditions) {
-	if (!conditions) return [];
-	return [];
-};
 
 module.exports = new AwesomeConfig();

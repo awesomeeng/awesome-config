@@ -101,9 +101,9 @@ describe("Config",function(){
 		config.add(AwesomeUtils.Module.resolve(module,"./test.cfg"));
 	});
 
-	// it("add directory",function(){
-	// 	config.add(AwesomeUtils.Module.resolve(module,"./test.cfg"));
-	// });
+	it("add directory",function(){
+		config.add(AwesomeUtils.Module.resolve(module,"./"));
+	});
 
 
 });
