@@ -8,7 +8,8 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 	parse(content) {
 		super.parse(content);
 
-		return this.parseExpression();
+		let expression = this.parseExpression();
+		console.log(JSON.stringify(expression,null,2));
 	}
 
 	isPathCharacter(c) {
@@ -19,10 +20,16 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 		return c==="\"" || c==="'";
 	}
 
+	isOperatorCharacter(c) {
+		return c==="=" || c==="<" || c===">" || c==="!" || c==="~";
+	}
+
 	popWord() {
 		let word = "";
 		while (true) {
 			let next = this.peek();
+			if (next===undefined) break;
+
 			if (this.isPathCharacter(next)) {
 				word += this.pop();
 			}
@@ -51,8 +58,9 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 
 		let text = "";
 		while (true) {
-			next = this.peek();
 			next2 = this.peek(2);
+			if (next===undefined) break;
+			next = this.peek();
 
 			if (starting==="#" && this.isNewLine(next)) {
 				this.pop();
@@ -76,6 +84,7 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 		let field = "";
 		while (true) {
 			let next = this.peek();
+			if (next===undefined) break;
 
 			if (this.isWhiteSpace(next)) {
 				this.popWhiteSpace();
@@ -88,82 +97,166 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 			}
 		}
 
-		console.log("field",field,this.pos);
-		return {
-			field: field,
-			operator: null,
-			value: null
-		};
+		return field;
 	}
 
 	parseOperator() {
-		console.log("operator");
-		return {
-			operator: null,
-			value: null
-		};
+		let operator = "";
+		while (true) {
+			let next = this.peek();
+
+			if (this.isWhiteSpace(next)) {
+				this.popWhiteSpace();
+			}
+			else if (this.isOperatorCharacter(next)) {
+				operator += this.pop();
+			}
+			else {
+				break;
+			}
+		}
+
+		return operator;
 	}
 
 	parseValue() {
-		console.log("value");
-		return null;
+		let value = "";
+
+		let quoting = null;
+		while (true) {
+			let next = this.peek();
+			if (next===undefined) break;
+
+			if (this.pos>=this.content.length) {
+				break;
+			}
+			else if (!quoting && value && this.isWhiteSpace(next)) {
+				break;
+			}
+			else if (!quoting && !value && this.isWhiteSpace(next)) {
+				this.popWhiteSpace();
+			}
+			else if (!quoting && this.isQuoteCharacter(next) && this.previous()!=="\\") {
+				quoting = next;
+				value += this.pop();
+			}
+			else if (quoting && next===quoting) {
+				quoting = null;
+				value += this.pop();
+			}
+			else if (!quoting && next===")") {
+				break;
+			}
+			else {
+				value += this.pop();
+			}
+		}
+		return value;
 	}
 
-	parseNot() {
-		console.log("not");
-		return null;
+	parseAnd(left) {
+		let start = this.pos;
+		let word = this.popWord().toLowerCase();
+		if (!word==="and") this.error("Expected and.",start);
+
+		let right = this.parseExpression();
+		if (!right) this.error("Missing right side of and.");
+
+		return {
+			type: "and",
+			left,
+			right
+		};
 	}
 
-	parseAnd() {
-		console.log("and");
-		return null;
+	parseOr(left) {
+		let start = this.pos;
+		let word = this.popWord().toLowerCase();
+		if (!word==="or") this.error("Expected or.",start);
+
+		let right = this.parseExpression();
+		if (!right) this.error("Missing right side of or.");
+
+		return {
+			type: "or",
+			left,
+			right
+		};
 	}
 
-	parseOr() {
-		console.log("or");
-		return null;
+	parseGroup() {
+		let start = this.pos;
+
+		let next = this.pop();
+		if (next!=="(") this.error("Expected grouping open parenthesis.",start);
+
+		let expression = this.parseExpression(true);
+		if (!expression) this.error("Expected expression.");
+
+		this.popWhiteSpace();
+		next = this.pop();
+		if (next!==")") this.error("Expected grouping end paraenthesis.");
+
+		return {
+			type: "group",
+			expression: expression
+		};
 	}
 
-	parseExpression() {
-		console.log(1,this.content);
-
+	parseExpression(inGroup=false) {
 		let expression = null;
 		let field = null;
 		let operator = null;
 		let value = null;
 
 		while (this.pos<this.content.length) {
-			let nextword = this.peekWord();
-			let next = this.peek();
 			let next2 = this.peek(2);
+			let next = this.peek();
+			if (next===undefined) break;
+			let nextword = this.peekWord();
 
 			if (this.isWhiteSpace(next)) {
 				this.popWhiteSpace();
 			}
-			else if (nextword && nextword.match(/^not$/i)) {
-				expression = this.parseNot(expression);
-			}
-			else if (nextword && nextword.match(/^and$/i)) {
-				expression = this.parseAnd(expression);
-			}
-			else if (nextword && nextword.match(/^or$/i)) {
-				expression = this.parseOr();
-			}
 			else if (next==="#" || next2==="//" || next2==="/*") {
 				this.parseComment();
 			}
-			else if (!field) {
-				({field,operator,value} = this.parseField());
+			else if (expression && nextword && nextword.match(/^and$/i)) {
+				expression = this.parseAnd(expression);
 			}
-			else if (field && !operator) {
-				({operator,value} = this.parseOperator());
+			else if (expression && nextword && nextword.match(/^or$/i)) {
+				expression = this.parseOr(expression);
 			}
-			else if (field && operator && !value) {
-				field = this.parseValue();
+			else if (!expression && next==="(") {
+				expression = this.parseGroup();
+			}
+			else if (expression && next===")") {
+				break;
+			}
+			else if (!expression && !field) {
+				field = this.parseField();
+				if (!field) this.error("Expected field.");
+			}
+			else if (!expression && field && !operator) {
+				operator = this.parseOperator();
+				if (!operator) this.error("Expected operator.");
+			}
+			else if (!expression && field && operator && !value) {
+				value = this.parseValue();
+				if (!value) this.error("Expected value.");
+			}
+			else if (expression && inGroup && next===")") {
+				break;
+			}
+			else {
+				this.error("Expected expression.");
 			}
 
-			if (field && operator && value) {
-				// create epxression
+			if (!expression && field && operator && value) {
+				expression = {field,operator,value};
+				field = null;
+				operator = null;
+				value = null;
 			}
 		}
 

@@ -48,6 +48,7 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 		while (true) {
 			let next2 = this.peek(2);
 			let next = this.pop();
+			if (next===undefined) break;
 
 			if (!quoting && next==="{") {
 				braces += 1;
@@ -104,6 +105,7 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 		while (true) {
 			let next2 = this.peek(2);
 			let next = this.pop();
+			if (next===undefined) break;
 
 			if (!quoting && next==="[") {
 				brackets += 1;
@@ -149,8 +151,9 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 
 		let text = "";
 		while (true) {
-			next = this.peek();
 			next2 = this.peek(2);
+			next = this.peek();
+			if (next===undefined) break;
 
 			if (starting==="#" && this.isNewLine(next)) {
 				this.pop();
@@ -215,6 +218,8 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 		let mustBeAssignment = false;
 		while(true) {
 			let next = this.pop();
+			if (next===undefined) break;
+
 			if (!mustBeAssignment && this.isPathCharacter(next)) {
 				key += next;
 			}
@@ -240,6 +245,8 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 		while (true) {
 			let next2 = this.peek(2);
 			let next = this.pop();
+			if (next===undefined) break;
+
 			if (this.isNewLine(next)) {
 				break;
 			}
@@ -285,6 +292,7 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 		while (true) {
 			let next2 = this.peek(2);
 			let next = this.pop();
+			if (next===undefined) break;
 
 			if (!quoting && next==="]") {
 				break;
@@ -313,8 +321,9 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 		let sources = [];
 
 		while (this.pos<this.content.length) {
-			let next = this.peek();
 			let next2 = this.peek(2);
+			let next = this.peek();
+			if (next===undefined) break;
 
 			if (this.isWhiteSpace(next)) {
 				this.popWhiteSpace();
