@@ -2,33 +2,51 @@
 
 "use strict";
 
-const ConfigConditionParser = require("./ConfigConditionParser");
+const NOT_REQUIRED = "Not Required.";
 
-const parser = new ConfigConditionParser();
+const $OPERATOR = Symbol("operator");
+const $VALUE = Symbol("value");
 
 class AbstractCondition {
-	constructor() {
-
+	constructor(/*field*/) {
+		// throw new Error("Does not match condition.");
 	}
 
-	matches() {
+	static NOT_REQUIRED() {
+		return NOT_REQUIRED;
+	}
+
+	get operator() {
+		return this[$OPERATOR];
+	}
+
+	set operator(x) {
+		this[$OPERATOR] = x;
+	}
+
+	get value() {
+		return this[$VALUE];
+	}
+
+	set value(x) {
+		this[$VALUE] = x;
+	}
+
+	get name() {
+		throw new Error("Not implemented. AbstractCondition requires this method be implemented.");
+	}
+
+	isOperatorValid(/*op*/) {
+		throw new Error("Not implemented. AbstractCondition requires this method be implemented.");
+	}
+
+	resolve() {
 		throw new Error("Not implemented. AbstractCondition requires this method be implemented.");
 	}
 
 	toString() {
 		throw new Error("Not implemented. AbstractCondition requires this method be implemented.");
 	}
-
-	static parse(s) {
-		if (!s) return [];
-		if (typeof s!=="string") throw new Error("Invalid conditions.");
-
-		s = s.trim();
-		if (s==="") return [];
-
-		return parser.parse(s);
-	}
 }
-
 
 module.exports = AbstractCondition;

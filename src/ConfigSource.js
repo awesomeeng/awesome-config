@@ -2,13 +2,13 @@
 
 "use strict";
 
-const Lodash = require("lodash");
-
-const AbstractCondition = require("./AbstractCondition");
+const ConfigConditionParser = require("./ConfigConditionParser");
 
 const $ORIGIN = Symbol("origin");
 const $CONTENT = Symbol("content");
 const $CONDITIONS = Symbol("conditions");
+
+const parser = new ConfigConditionParser();
 
 class ConfigSource {
 	constructor(origin,content,conditions) {
@@ -19,7 +19,7 @@ class ConfigSource {
 		if (conditions===undefined || conditions===null) throw new Error("Missing conditions.");
 		if (typeof conditions!=="string") throw new Error("Invalid conditions.");
 
-		conditions = AbstractCondition.parse(conditions);
+		conditions = ConfigSource.parseConditions(conditions);
 
 		this[$ORIGIN] = origin;
 		this[$CONTENT] = content;
@@ -39,7 +39,20 @@ class ConfigSource {
 	}
 
 	matches() {
-		return true;
+		if (!this.conditions || this.conditions.length<1) return true;
+		return this.conditions.every((condition)=>{
+			return condition.resolve();
+		});
+	}
+
+	static parseConditions(s) {
+		if (!s) return [];
+		if (typeof s!=="string") throw new Error("Invalid conditions.");
+
+		s = s.trim();
+		if (s==="") return [];
+
+		return parser.parse(s);
 	}
 }
 

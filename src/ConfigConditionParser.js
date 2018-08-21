@@ -2,14 +2,36 @@
 
 "use strict";
 
+const FS = require("fs");
+const Path = require("path");
+
 const AwesomeUtils = require("AwesomeUtils");
+
+const AbstractCondition = require("./AbstractCondition");
+const NotCondition = require("./NotCondition");
+const AndCondition = require("./AndCondition");
+const OrCondition = require("./OrCondition");
+const GroupCondition = require("./GroupCondition");
+
+const conditions = [];
+(function(){
+	let srcdir = AwesomeUtils.Module.resolve(module,"./conditions");
+	FS.readdirSync(srcdir).forEach((filename)=>{
+		if (!filename.endsWith(".js") && !filename.endsWith(".node")) return;
+		filename = Path.resolve(srcdir,filename);
+		let cls = require(filename);
+		if (!cls) return;
+		if (!AbstractCondition.isPrototypeOf(cls)) return;
+
+		conditions.push(cls);
+	});
+})();
 
 class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 	parse(content) {
 		super.parse(content);
 
 		let expression = this.parseExpression();
-		console.log(JSON.stringify(expression,null,2));
 	}
 
 	isPathCharacter(c) {
@@ -21,7 +43,7 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 	}
 
 	isOperatorCharacter(c) {
-		return c==="=" || c==="<" || c===">" || c==="!" || c==="~";
+		return c==="=" || c==="<" || c===">" || c==="!" || c==="~" || c==="^" || c==="$";
 	}
 
 	popWord() {
@@ -81,27 +103,35 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 	}
 
 	parseField() {
-		let field = "";
+		this.popWhiteSpace();
+
+		let text = "";
 		while (true) {
 			let next = this.peek();
 			if (next===undefined) break;
 
-			if (this.isWhiteSpace(next)) {
-				this.popWhiteSpace();
-			}
-			else if (this.isPathCharacter(next)) {
-				field += this.pop();
+			if (this.isPathCharacter(next)) {
+				text += this.pop();
 			}
 			else {
 				break;
 			}
 		}
 
+		if (!text) this.error("Expected field.");
+
+		let field = this.getAssociatedFieldObject(text);
+		if (!field) this.error("Unknown field '"+text+"'.");
+
+		if (field.operator!==AbstractCondition.NOT_REQUIRED) this.parseFieldOperator(field);
+
 		return field;
 	}
 
-	parseOperator() {
-		let operator = "";
+	parseFieldOperator(field) {
+		if (!field) this.error("Invalid field passed to parseFieldOperator.");
+
+		let text = "";
 		while (true) {
 			let next = this.peek();
 
@@ -109,19 +139,26 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 				this.popWhiteSpace();
 			}
 			else if (this.isOperatorCharacter(next)) {
-				operator += this.pop();
+				text += this.pop();
 			}
 			else {
 				break;
 			}
 		}
 
-		return operator;
+		if (!field.isOperatorValid(text)) this.error("Invalid operator '"+text+"' for field '"+field.name+"'.");
+
+		field.operator = text;
+
+		if (field.value!==AbstractCondition.NOT_REQUIRED) this.parseFieldValue(field);
+
+		return field;
 	}
 
-	parseValue() {
-		let value = "";
+	parseFieldValue(field) {
+		if (!field) this.error("Invalid field passed to parseFieldOperator.");
 
+		let text = "";
 		let quoting = null;
 		while (true) {
 			let next = this.peek();
@@ -130,28 +167,43 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 			if (this.pos>=this.content.length) {
 				break;
 			}
-			else if (!quoting && value && this.isWhiteSpace(next)) {
+			else if (!quoting && text && this.isWhiteSpace(next)) {
 				break;
 			}
-			else if (!quoting && !value && this.isWhiteSpace(next)) {
+			else if (!quoting && !text && this.isWhiteSpace(next)) {
 				this.popWhiteSpace();
 			}
 			else if (!quoting && this.isQuoteCharacter(next) && this.previous()!=="\\") {
 				quoting = next;
-				value += this.pop();
+				text += this.pop();
 			}
 			else if (quoting && next===quoting) {
 				quoting = null;
-				value += this.pop();
+				text += this.pop();
 			}
 			else if (!quoting && next===")") {
 				break;
 			}
 			else {
-				value += this.pop();
+				text += this.pop();
 			}
 		}
-		return value;
+
+		if (text==="") this.error("Missing value for field '"+field.name+"'.");
+		field.value = text;
+
+		return field;
+	}
+
+	parseNot() {
+		let start = this.pos;
+		let word = this.popWord().toLowerCase();
+		if (!word==="not") this.error("Expected not.",start);
+
+		let expression = this.parseExpression();
+		if (!expression) this.error("Missing expression for not.");
+
+		return new NotCondition(expression);
 	}
 
 	parseAnd(left) {
@@ -162,11 +214,7 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 		let right = this.parseExpression();
 		if (!right) this.error("Missing right side of and.");
 
-		return {
-			type: "and",
-			left,
-			right
-		};
+		return new AndCondition(left,right);
 	}
 
 	parseOr(left) {
@@ -177,11 +225,7 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 		let right = this.parseExpression();
 		if (!right) this.error("Missing right side of or.");
 
-		return {
-			type: "or",
-			left,
-			right
-		};
+		return new OrCondition(left,right);
 	}
 
 	parseGroup() {
@@ -197,17 +241,11 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 		next = this.pop();
 		if (next!==")") this.error("Expected grouping end paraenthesis.");
 
-		return {
-			type: "group",
-			expression: expression
-		};
+		return new GroupCondition(expression);
 	}
 
 	parseExpression(inGroup=false) {
 		let expression = null;
-		let field = null;
-		let operator = null;
-		let value = null;
 
 		while (this.pos<this.content.length) {
 			let next2 = this.peek(2);
@@ -224,6 +262,9 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 			else if (expression && nextword && nextword.match(/^and$/i)) {
 				expression = this.parseAnd(expression);
 			}
+			else if (!expression && nextword && nextword.match(/^not$/i)) {
+				expression = this.parseNot();
+			}
 			else if (expression && nextword && nextword.match(/^or$/i)) {
 				expression = this.parseOr(expression);
 			}
@@ -233,17 +274,8 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 			else if (expression && next===")") {
 				break;
 			}
-			else if (!expression && !field) {
-				field = this.parseField();
-				if (!field) this.error("Expected field.");
-			}
-			else if (!expression && field && !operator) {
-				operator = this.parseOperator();
-				if (!operator) this.error("Expected operator.");
-			}
-			else if (!expression && field && operator && !value) {
-				value = this.parseValue();
-				if (!value) this.error("Expected value.");
+			else if (!expression) {
+				expression = this.parseField();
 			}
 			else if (expression && inGroup && next===")") {
 				break;
@@ -251,16 +283,21 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 			else {
 				this.error("Expected expression.");
 			}
-
-			if (!expression && field && operator && value) {
-				expression = {field,operator,value};
-				field = null;
-				operator = null;
-				value = null;
-			}
 		}
 
 		return expression;
+	}
+
+	getAssociatedFieldObject(field) {
+		return conditions.reduce((match,condition)=>{
+			if (match) return match;
+			try {
+				return new condition(field);
+			}
+			catch (ex) {
+				return null;
+			}
+		},null);
 	}
 }
 
