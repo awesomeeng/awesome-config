@@ -28,6 +28,11 @@ class OSCondition extends AbstractCondition {
 		let answer = false;
 		let value = this.value.toLowerCase();
 		switch (value) {
+			case "*":
+			case "any": {
+				answer = true;
+				break;
+			}
 			case "win":
 			case "win32":
 			case "windows":

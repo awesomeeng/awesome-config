@@ -6,12 +6,11 @@ const OS = require("os");
 
 const AbstractCondition = require("../AbstractCondition");
 
-const hostname = OS.hostname();
 
-class HostnameCondition extends AbstractCondition {
+class CWDCondition extends AbstractCondition {
 	constructor(field) {
 		super();
-		if (field.toLowerCase()!=="hostname") throw new Error("Does not match condition.");
+		if (field.toLowerCase()!=="cwd" && field.toLowerCase()!=="currentdir") throw new Error("Does not match condition.");
 	}
 
 	get name() {
@@ -33,19 +32,21 @@ class HostnameCondition extends AbstractCondition {
 		let answer = false;
 		let value = this.value;
 
+		let cwd = process.cwd();
+
 		if (value==="*") answer = true;
-		else if (operator==="=" || operator==="==" || operator==="===") answer = value===hostname;
-		else if (operator==="^") answer = hostname.startsWith(value);
-		else if (operator==="$") answer = hostname.endsWith(value);
-		else if (operator==="~") answer = hostname.indexOf(value)>-1;
+		else if (operator==="=" || operator==="==" || operator==="===") answer = value===cwd;
+		else if (operator==="^") answer = cwd.startsWith(value);
+		else if (operator==="$") answer = cwd.endsWith(value);
+		else if (operator==="~") answer = cwd.indexOf(value)>-1;
 		else throw new Error("Invalid operator.");
 
 		return invert ? !answer : answer;
 	}
 
 	toString() {
-		return "hostname"+this.operator+this.value;
+		return "cwd"+this.operator+this.value;
 	}
 }
 
-module.exports = HostnameCondition;
+module.exports = CWDCondition;

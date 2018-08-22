@@ -6,12 +6,12 @@ const OS = require("os");
 
 const AbstractCondition = require("../AbstractCondition");
 
-const hostname = OS.hostname();
+const uname = OS.type();
 
-class HostnameCondition extends AbstractCondition {
+class UnameCondition extends AbstractCondition {
 	constructor(field) {
 		super();
-		if (field.toLowerCase()!=="hostname") throw new Error("Does not match condition.");
+		if (field.toLowerCase()!=="uname" && field.toLowerCase()!=="type") throw new Error("Does not match condition.");
 	}
 
 	get name() {
@@ -34,18 +34,18 @@ class HostnameCondition extends AbstractCondition {
 		let value = this.value;
 
 		if (value==="*") answer = true;
-		else if (operator==="=" || operator==="==" || operator==="===") answer = value===hostname;
-		else if (operator==="^") answer = hostname.startsWith(value);
-		else if (operator==="$") answer = hostname.endsWith(value);
-		else if (operator==="~") answer = hostname.indexOf(value)>-1;
+		else if (operator==="=" || operator==="==" || operator==="===") answer = value===uname;
+		else if (operator==="^") answer = uname.startsWith(value);
+		else if (operator==="$") answer = uname.endsWith(value);
+		else if (operator==="~") answer = uname.indexOf(value)>-1;
 		else throw new Error("Invalid operator.");
 
 		return invert ? !answer : answer;
 	}
 
 	toString() {
-		return "hostname"+this.operator+this.value;
+		return "uname"+this.operator+this.value;
 	}
 }
 
-module.exports = HostnameCondition;
+module.exports = UnameCondition;
