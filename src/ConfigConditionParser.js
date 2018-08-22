@@ -31,7 +31,7 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 	parse(content) {
 		super.parse(content);
 
-		let expression = this.parseExpression();
+		return this.parseExpression();
 	}
 
 	isPathCharacter(c) {

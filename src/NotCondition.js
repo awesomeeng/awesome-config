@@ -35,7 +35,7 @@ class NotCondition extends AbstractCondition {
 	}
 
 	resolve() {
-		return this.expression.resolve() && this.right.resolve();
+		return !this.expression.resolve();
 	}
 
 	toString() {
