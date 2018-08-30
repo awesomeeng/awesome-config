@@ -8,10 +8,10 @@ const $ORIGIN = Symbol("origin");
 const $CONTENT = Symbol("content");
 const $CONDITIONS = Symbol("conditions");
 
-const parser = new ConfigConditionParser();
+const conditionParser = new ConfigConditionParser();
 
 class ConfigSource {
-	constructor(origin,content,conditions) {
+	constructor(origin,content,conditions="") {
 		if (!origin) throw new Error("Missing origin.");
 		if (typeof origin!=="string") throw new Error("Invalid origin.");
 		if (!content) throw new Error("Missing content.");
@@ -46,13 +46,13 @@ class ConfigSource {
 	}
 
 	static parseConditions(s) {
-		if (!s) return [];
+		if (!s) return null;
 		if (typeof s!=="string") throw new Error("Invalid conditions.");
 
 		s = s.trim();
-		if (s==="") return [];
+		if (s==="") return null;
 
-		return parser.parse(s);
+		return conditionParser.parse(s);
 	}
 }
 

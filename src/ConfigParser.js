@@ -45,7 +45,7 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 		let keyend = false;
 
 		let text = "";
-		while (true) {
+		while (this.pos<this.content.length) {
 			let next2 = this.peek(2);
 			let next = this.pop();
 			if (next===undefined) break;
@@ -102,7 +102,7 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 		let quoting = null;
 
 		let text = "";
-		while (true) {
+		while (this.pos<this.content.length) {
 			let next2 = this.peek(2);
 			let next = this.pop();
 			if (next===undefined) break;
@@ -150,7 +150,7 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 		this.pop(starting.length);
 
 		let text = "";
-		while (true) {
+		while (this.pos<this.content.length) {
 			next2 = this.peek(2);
 			next = this.peek();
 			if (next===undefined) break;
@@ -185,20 +185,22 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 			let json = this.popJSONText();
 			try {
 				let obj = JSON.parse(json);
-				if (obj===undefined || obj===null) return;
+				if (obj===undefined || obj===null) obj = null;
 				Lodash.set(root,key,obj);
+				if (this.peek()===",") this.pop();
 			}
 			catch (ex) {
 				this.error("JSON parsing error",pos);
 			}
 		}
-		if (next==="[") {
+		else if (next==="[") {
 			let pos = this.pos;
 			let json = this.popArrayText();
 			try {
 				let obj = JSON.parse(json);
-				if (obj===undefined || obj===null) return;
+				if (obj===undefined || obj===null) obj = null;
 				Lodash.set(root,key,obj);
+				if (this.peek()===",") this.pop();
 			}
 			catch (ex) {
 				this.error("JSON parsing error",pos);
@@ -216,7 +218,7 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 		let key = "";
 
 		let mustBeAssignment = false;
-		while(true) {
+		while (this.pos<this.content.length) {
 			let next = this.pop();
 			if (next===undefined) break;
 
@@ -241,8 +243,9 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 	parseValue() {
 		let value = "";
 		let quoting = null;
+		let quoted = false;
 
-		while (true) {
+		while (this.pos<this.content.length) {
 			let next2 = this.peek(2);
 			let next = this.pop();
 			if (next===undefined) break;
@@ -250,8 +253,12 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 			if (this.isNewLine(next)) {
 				break;
 			}
+			else if (quoted && !quoting && next!==",") {
+				this.error("Invalid characters after quote.");
+			}
 			else if (!quoting && this.isQuoteCharacter(next) && this.previous()!=="\\") {
 				quoting = next;
+				quoted = true;
 			}
 			else if (quoting && next===quoting) {
 				quoting = null;
@@ -265,6 +272,8 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 
 			if (next) value += next;
 		}
+
+		if (value.endsWith(",")) value = value.slice(0,-1);
 		value = this.transformValue(value);
 
 		return value;
@@ -289,7 +298,7 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 		this.pop();
 
 		let text = "";
-		while (true) {
+		while (this.pos<this.content.length) {
 			let next2 = this.peek(2);
 			let next = this.pop();
 			if (next===undefined) break;
@@ -336,8 +345,7 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 			}
 			else if (next==="[") {
 				if (Object.keys(root).length>0) {
-					// console.log(100,this.origin,root);
-					sources.push(new ConfigSource(this.origin,root,conditions));
+					sources.push(new ConfigSource(this.origin,root,conditions||""));
 				}
 				conditions = this.parseRootConditions() || this.defaultConditions;
 				root = {};
@@ -348,8 +356,7 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 		}
 
 		if (Object.keys(root).length>0) {
-			// console.log(100,this.origin,root);
-			sources.push(new ConfigSource(this.origin,root,conditions));
+			sources.push(new ConfigSource(this.origin,root,conditions||""));
 		}
 
 		return sources;
@@ -366,9 +373,6 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 
 	transformValue(value) {
 		value = value.trim();
-
-		if (value===undefined) return undefined;
-		if (value==="undefined") return undefined;
 
 		if (value===null) return null;
 		if (value==="null") return null;
