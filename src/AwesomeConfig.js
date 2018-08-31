@@ -4,7 +4,6 @@
 
 const FS = require("fs");
 const Path = require("path");
-const Lodash = require("lodash");
 
 const AwesomeUtils = require("AwesomeUtils");
 const Log = require("AwesomeLog");
@@ -116,9 +115,7 @@ class AwesomeConfig {
 	 * @return {Array<String>} [description]
 	 */
 	get sources() {
-		return Lodash.uniq(this[$SOURCES].map((source)=>{
-			return source.origin;
-		}));
+		return [...new Set(this[$SOURCES])];
 	}
 
 	/**
@@ -133,8 +130,11 @@ class AwesomeConfig {
 		let root = {};
 		this[$SOURCES].forEach((source)=>{
 			if (!source.matches()) return;
-			root = Lodash.extend(root,source.content);
+			root = AwesomeUtils.Object.extend(root,source.content);
 		});
+
+		if (this.resolver) this.resolver.resolve(root);
+
 		this[$CONFIG] = root;
 
 		Log.info && Log.info("AwesomeConfig","Started.");
@@ -209,7 +209,7 @@ class AwesomeConfig {
 		let sources = [];
 
 		let valid = false;
-		if (Lodash.isPlainObject(content)) {
+		if (AwesomeUtils.Object.isPlainObject(content)) {
 			valid = true;
 			origin = AwesomeUtils.Module.sourceAndLine(1);
 			sources = sources.concat([new ConfigSource(origin,content,defaultConditions)]);
