@@ -10,7 +10,6 @@ const assert = require("assert");
 
 const ConfigResolver = require("../src/ConfigResolver");
 
-
 describe("ConfigResolver",function(){
 	let resolver = new ConfigResolver();
 

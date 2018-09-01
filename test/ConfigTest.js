@@ -14,53 +14,43 @@ const AwesomeUtils = require("AwesomeUtils");
 describe("Config",function(){
 	let config = require("../src/AwesomeConfig");
 
-	afterEach(()=>{
-		config.$$stop();
-		config.reset();
+	beforeEach(()=>{
+		if (config().initialized) config().stop().reset();
 	});
 
-	it("required",function(){
+	afterEach(()=>{
+		if (config().initialized) config().stop().reset();
+	});
+
+	it("init",function(){
 		assert(config);
-		assert.strictEqual(Object.keys(config).length,0);
+		assert(config());
+		assert(!config().initialized);
+		config().init();
+		assert(config().initialized);
 	});
 
 	it("start/stop",function(){
-		config.start();
-		assert(config);
-		assert(!config.start);
-		assert(!config.add);
-		assert(!config.sources);
-		assert(!config.reset);
-		assert(config.$$stop);
-		assert.strictEqual(Object.keys(config).length,0);
-
-		config.$$stop();
-		assert(config.start);
-		assert(config.add);
-		assert(config.sources);
-		assert(config.reset);
-		assert(config.$$stop);
-		assert.strictEqual(Object.keys(config).length,0);
+		assert(!config().started);
+		config().start();
+		assert(config().started);
+		config().stop();
+		assert(!config().started);
 	});
 
 	it("reset",function(){
-		config.add({
-			one: 1,
-			two: 2,
-			three: {
-				four: 34
-			}
-		});
-
-		assert.strictEqual(config.sources.length,1);
-
-		config.reset();
-
-		assert.strictEqual(config.sources.length,0);
+		assert.strictEqual(config().sources.length,0);
+		config().add({});
+		config().start();
+		assert.strictEqual(config().sources.length,1);
+		config().stop();
+		config().reset();
+		assert.strictEqual(config().sources.length,0);
 	});
 
+
 	it("add object",function(){
-		config.add({
+		config().add({
 			one: 1,
 			two: 2,
 			three: {
@@ -68,19 +58,20 @@ describe("Config",function(){
 			}
 		});
 
-		assert.strictEqual(config.sources.length,1);
+		assert.strictEqual(config().sources.length,1);
 
-		config.start();
+		config().start();
 
 		assert(config);
 		assert.strictEqual(Object.keys(config).length,3);
 		assert.strictEqual(config.one,1);
 		assert.strictEqual(config.two,2);
 		assert.strictEqual(config.three.four,34);
+		assert(!config.seven);
 	});
 
 	it("add string",function(){
-		config.add(`
+		config().add(`
 
 			// this is some config
 
@@ -90,7 +81,7 @@ describe("Config",function(){
 
 			# asdf sd
 		`);
-		config.start();
+		config().start();
 		assert.strictEqual(Object.keys(config).length,3);
 		assert.strictEqual(config.one,1);
 		assert.strictEqual(config.two,2);
@@ -98,10 +89,43 @@ describe("Config",function(){
 	});
 
 	it("add filename",function(){
-		config.add(AwesomeUtils.Module.resolve(module,"./test.cfg"));
+		config().add(AwesomeUtils.Module.resolve(module,"./test.cfg"));
+		config().start();
+		assert.strictEqual(config.types.object.one,1);
+		assert.strictEqual(config.types.object.two,2);
+		assert.deepStrictEqual(config.types.object.three,[3,33,{three: {four:34}}]);
 	});
 
 	it("add directory",function(){
-		config.add(AwesomeUtils.Module.resolve(module,"./"));
+		config().add(AwesomeUtils.Module.resolve(module,"./"));
+		config().start();
+		assert.strictEqual(config.types.object.one,1);
+		assert.strictEqual(config.types.object.two,2);
+		assert.deepStrictEqual(config.types.object.three,[3,33,{three: {four:34}}]);
 	});
+
+	it("instance support",function(){
+		let ConfigTestModule = require("./ConfigTestModule.js");
+		new ConfigTestModule();
+
+		config().add({
+			one: 1,
+			two: 2,
+			three: {
+				four: 34
+			}
+		});
+
+		assert.strictEqual(config().sources.length,1);
+
+		config().start();
+
+		assert(config);
+		assert.strictEqual(Object.keys(config).length,3);
+		assert.strictEqual(config.one,1);
+		assert.strictEqual(config.two,2);
+		assert.strictEqual(config.three.four,34);
+	});
+
+
 });

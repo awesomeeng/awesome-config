@@ -40,9 +40,7 @@ class ConfigSource {
 
 	matches() {
 		if (!this.conditions || this.conditions.length<1) return true;
-		return this.conditions.every((condition)=>{
-			return condition.resolve();
-		});
+		return this.conditions.resolve();
 	}
 
 	static parseConditions(s) {

@@ -2,21 +2,10 @@
 
 "use strict";
 
-const FS = require("fs");
-const Path = require("path");
-
 const AwesomeUtils = require("AwesomeUtils");
 const Log = require("AwesomeLog");
 
-const ConfigSource = require("./ConfigSource");
-const ConfigParser = require("./ConfigParser");
-const ConfigResolver = require("./ConfigResolver");
-
-const $CONFIG = Symbol("config");
-const $OPTIONS = Symbol("options");
-const $SOURCES = Symbol("sources");
-const $PARSER = Symbol("parser");
-const $RESOLVER = Symbol("resolver");
+const ConfigInstance = require("./ConfigInstance");
 
 /**
  * The AwesomeConfig class, which is instantiated and returned whenever you
@@ -56,198 +45,138 @@ const $RESOLVER = Symbol("resolver");
  */
 class AwesomeConfig {
 	constructor(options) {
-		this[$OPTIONS] = Object.assign({
+		options = Object.assign({
 			paths: [],
 			fileEncoding: "utf-8"
 		},options);
 
-		this[$PARSER] = new ConfigParser();
-		this[$RESOLVER] = new ConfigResolver();
+		let instances = {};
 
-		this[$CONFIG] = null;
-		this[$SOURCES] = [];
+		Log.info && Log.info("AwesomeConfig","Installed.");
 
-		Log.info && Log.info("AwesomeConfig","Initialized.");
-
-		return new Proxy(this,{
-			get: (me,prop)=>{
-				if (me[$CONFIG] && (typeof prop==="symbol" || !prop.startsWith("$$"))) return me[$CONFIG][prop];
-				else return me[prop];
-			},
-			has: (me,prop)=>{
-				if (me[$CONFIG]) return prop in me[$CONFIG];
-				else return prop in me;
-			},
-			getOwnPropertyDescriptor: (me,prop)=>{
-				if (me[$CONFIG]) return Object.getOwnPropertyDescriptor(me[$CONFIG],prop);
-				else return Object.getOwnPropertyDescriptor(me,prop);
-			},
-			ownKeys: (me)=>{
-				if (me[$CONFIG]) return [].concat(Object.getOwnPropertyNames(me[$CONFIG]),Object.getOwnPropertySymbols(me[$CONFIG]));
-				else return [].concat(Object.getOwnPropertyNames(me),Object.getOwnPropertySymbols(me));
+		const getId = function getId() {
+			let current = global.module || process.mainModule || null;
+			while (current) {
+				let id = current.id || "";
+				if (id===".") break;
+				if (instances[id]) return id;
+				current = current.parent;
 			}
+			return AwesomeUtils.Module.source(2,true);
+		};
+
+		const getInstance = function getInstance(id) {
+			if (!id) throw new Error("Missing id.");
+			if (!instances[id]) return null;
+			return instances[id];
+		};
+
+		const init = function init() {
+			let id = getId();
+			if (!instances[id]) instances[id] = new ConfigInstance(id);
+			return apply();
+		};
+
+		const start = function start() {
+			let id = getId();
+			let instance = getInstance(id);
+			if (!instance) throw new Error("init() must be called before start().");
+			if (!instance.started) instance.start();
+			return apply();
+		};
+
+		const stop = function stop() {
+			let id = getId();
+			let instance = getInstance(id);
+			if (!instance) throw new Error("init() must be called before stop().");
+			if (instance.started) instance.stop();
+			return apply();
+		};
+
+		const add = function add(content,defaultConditions="",encoding=options.encoding) {
+			let id = getId();
+			let instance = getInstance(id);
+			if (!instance) throw new Error("init() must be called before add().");
+			if (instance.started) throw new Error("add() must be called before start().");
+			instance.add(content,defaultConditions,encoding);
+			return apply();
+		};
+
+		const reset = function reset() {
+			let id = getId();
+			let instance = getInstance(id);
+			if (!instance) throw new Error("init() must be called before reset().");
+			instance.reset();
+			return apply();
+		};
+
+		const get = function get(target,prop) {
+			let id = getId();
+			let instance = getInstance(id);
+			if (!instance) return undefined;
+			if (!instance.started) return undefined;
+
+			return instance.config[prop];
+		};
+
+		const has = function has(target,prop) {
+			let id = getId();
+			let instance = getInstance(id);
+			if (!instance) return false;
+			if (!instance.started) return false;
+
+			return instance.config[prop]!==undefined;
+		};
+
+		const getOwnPropertyDescriptor = function getOwnPropertyDescriptor(target,prop) {
+			// this resolve an error with ownKeys requiring a 'prototype' member.
+			if (prop==="prototype") return {value: null, writable: false, enumerable: false, configurable: false};
+
+			let id = getId();
+			let instance = getInstance(id);
+			if (!instance) return undefined;
+			if (!instance.started) return undefined;
+
+			return Object.getOwnPropertyDescriptor(instance.config,prop);
+		};
+
+		const ownKeys = function ownKeys() {
+			// we need to include ["prototype"] or we get wierd proxy errors.
+			//
+			let id = getId();
+			let instance = getInstance(id);
+			if (!instance) return ["prototype"];
+			if (!instance.started) return ["prototype"];
+
+			return [].concat(Object.getOwnPropertyNames(instance.config),["prototype"]);
+		};
+
+		const apply = function config() {
+			let id = getId();
+			let instance = getInstance(id);
+			let initialized = !!instance;
+			let started = instance && instance.started || false;
+			let sources = instance && instance.sources || [];
+
+			return {
+				init,
+				initialized,
+				start,
+				stop,
+				started,
+				add,
+				sources,
+				reset
+			};
+		};
+
+		return new Proxy(apply,{
+			get,
+			has,
+			getOwnPropertyDescriptor,
+			ownKeys,
+			apply: apply
 		});
-	}
-
-	get options() {
-		return this[$OPTIONS];
-	}
-
-	get parser() {
-		return this[$PARSER];
-	}
-
-	get resolver() {
-		return this[$RESOLVER];
-	}
-
-	/**
-	 * Returns an array of all of the origin strings for each added
-	 * configuration.  The origin of each added configuration depends
-	 * on what was passed into `add()`. If you passed in an object or
-	 * string, the origin will be the filename and line number of
-	 * the javascript where the `add()` call was made. If you passed
-	 * in a file or a directory, the origin will be the filename
-	 * which was loaded and parsed.
-	 *
-	 * This member is not available once AwesomeConfig has been started.
-	 *
-	 * @return {Array<String>} [description]
-	 */
-	get sources() {
-		return [...new Set(this[$SOURCES])];
-	}
-
-	/**
-	 * Signals that all the config content has been added, and that AwesomeConfig
-	 * should switch to usage phase.  Once `start()` has been called, additional
-	 * configuration cannot be added or changed.
-	 *
-	 * To take configuration out of usage phase, you may issues a `$$stop()` call,
-	 * but that is only recommended for testing purposes.
-	 */
-	start() {
-		let root = {};
-		this[$SOURCES].forEach((source)=>{
-			if (!source.matches()) return;
-			root = AwesomeUtils.Object.extend(root,source.content);
-		});
-
-		if (this.resolver) this.resolver.resolve(root);
-
-		this[$CONFIG] = root;
-
-		Log.info && Log.info("AwesomeConfig","Started.");
-	}
-
-	/**
-	 * The `$$stop()` method is used to stop AwesomeConfig from being in usage
-	 * phase and allow the configuration to once again be changed.
-	 *
-	 * In almost all cases, this should never be needed.
-	 *
-	 * If this method is called before `start()`, nothing will happen.
-	 */
-	$$stop() {
-		this[$CONFIG] = null;
-		Log.info && Log.info("AwesomeConfig","Stopped.");
-	}
-
-	/**
-	 * Removes all previously added configuration, returning AwesomeConfig to
-	 * its default empty state. Generally only really needed in testing.
-	 *
-	 * This method is not available once AwesomeConfig has been started.
-	 */
-	reset() {
-		this[$SOURCES] = [];
-		Log.info && Log.info("AwesomeConfig","Reset.");
-	}
-
-	// add(object)
-	// add(jsonString)
-	// add(filename)
-	// add(directory)
-	/**
-	 * The `add()` method has four different usage forms, each unique in thier
-	 * own right:
-	 *
-	 * 		**add(object)** - You may add a plain JavaScript object as
-	 * 		configuration and it will be merged with the configuration.
-	 *
-	 * 		**add(string)** - You may add a string as configuration data
-	 * 		and it will be run through the configuration parser and the
-	 * 		resulting data will be merged with the configuration.
-	 *
-	 * 		**add(filename)** - You may add a fully resolved filename and
-	 * 		the content of the file will be read in, run through the
-	 * 		configuration parser, and the resulting data will be merged
-	 * 		with the configuration.
-	 *
-	 * 		**add(directory)** - You may add a fully resolved directory and
-	 * 		the directory will be examined for .config files. If any are
-	 * 		found, each file will be read ine, run through the configuration
-	 * 		parser, and the resulting data will be merged with the
-	 * 		configuration.
-	 *
-	 * Each call to `add()` will merge the given configuration with the
-	 * overall configuration, producing a new overall configuration.
-	 *
-	 * You may pass an optional string of *conditions* to add that will be
-	 * applied to determining if the content is merged or not.  See the
-	 * conditions section for a lot more details about how they work.
-	 *
-	 * @param {(object|string)} content         [description]
-	 * @param {string}
-	 */
-	add(content,defaultConditions="") {
-		if (!content) throw new Error("Missing configuration content.");
-		if (defaultConditions===null || defaultConditions===undefined) throw new Error("Missing defaultConditions.");
-		if (typeof defaultConditions!=="string") throw new Error("Invalid defaultConditions.");
-
-		let origin = null;
-		let sources = [];
-
-		let valid = false;
-		if (AwesomeUtils.Object.isPlainObject(content)) {
-			valid = true;
-			origin = AwesomeUtils.Module.sourceAndLine(1);
-			sources = sources.concat([new ConfigSource(origin,content,defaultConditions)]);
-		}
-		else if (typeof content==="string") {
-			let stat = null;
-			try {
-				stat = FS.statSync(content);
-			}
-			catch (ex) {
-				stat = null;
-			}
-			if (!stat) {
-				origin = AwesomeUtils.Module.sourceAndLine(1);
-				sources = sources.concat(this.parser.parse(origin,content,defaultConditions));
-				if (content) valid = true;
-			}
-			else if (stat && stat.isDirectory()) {
-				let dir = content;
-				FS.readdirSync(content).forEach((filename)=>{
-					filename = Path.resolve(dir,filename);
-					if (filename.endsWith(".cfg")) this.add(filename,defaultConditions);
-					sources = [];
-					valid = true;
-				});
-			}
-			else if (stat && stat.isFile()) {
-				origin = content;
-				content = FS.readFileSync(content,this.options.fileEncoding);
-				sources = sources.concat(this.parser.parse(origin,content,defaultConditions));
-				if (content) valid = true;
-			}
-		}
-		if (!valid) throw new Error("Invalid configuration content.");
-
-		this[$SOURCES] = this[$SOURCES].concat(sources);
-
-		Log.info && Log.info("AwesomeConfig","Added configuration from "+origin);
 	}
 }
 
