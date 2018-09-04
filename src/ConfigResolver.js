@@ -6,7 +6,9 @@ const AwesomeUtils = require("AwesomeUtils");
 
 const $STACK = Symbol("stack");
 
-
+/**
+ * Resolves a configuration for all its variables and placeholders.
+ */
 class DefaultResolver {
 	constructor() {
 		this[$STACK] = {};

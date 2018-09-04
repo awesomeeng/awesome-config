@@ -4,18 +4,35 @@
 
 const AbstractCondition = require("./AbstractCondition");
 
-const $EXPRESSION = Symbol("expression");
+const $CONDITION = Symbol("condition");
 
+/**
+ * represents a NOT condition that has a left side, which is a
+ * conditions in its own right. In order for a NOT condition to be true
+ * the left condition must be false.
+ *
+ * @extends AbstractCondition
+ */
 class NotCondition extends AbstractCondition {
-	constructor(expression) {
+	/**
+	 * Creates a new NOT condition.
+	 *
+	 * @param {AbstractCondition} condition
+	 */
+	constructor(condition) {
 		super();
-		if (!expression || !(expression instanceof AbstractCondition)) throw new Error("Invalid expression.");
+		if (!condition || !(condition instanceof AbstractCondition)) throw new Error("Invalid condition.");
 
-		this[$EXPRESSION] = expression;
+		this[$CONDITION] = condition;
 	}
 
-	get expression() {
-		return this[$EXPRESSION];
+	/**
+	 * Returns the inner condition of this NOT condition.
+	 *
+	 * @return {AbstractCondition} 
+	 */
+	get condition() {
+		return this[$CONDITION];
 	}
 
 	get operator() {
@@ -35,11 +52,11 @@ class NotCondition extends AbstractCondition {
 	}
 
 	resolve() {
-		return !this.expression.resolve();
+		return !this.condition.resolve();
 	}
 
 	toString() {
-		return "not("+this.expression.toString()+")";
+		return "not("+this.condition.toString()+")";
 	}
 }
 

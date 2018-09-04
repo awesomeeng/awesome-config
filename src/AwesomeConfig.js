@@ -8,48 +8,61 @@ const Log = require("AwesomeLog");
 const ConfigInstance = require("./ConfigInstance");
 
 /**
- * The AwesomeConfig class, which is instantiated and returned whenever you
+ * The AwesomeConfig class is instantiated and returned whenever you
  * require("AwesomeConfig").
  *
- * Using AwesomeConfig has two different phases: The setup phase, and the
- * usage phase.
+ * Once required, config can be referenced in one of two ways:
  *
- * During the setup phase, you require AwesomeConfig, add zero or more
- * configurations (object, json, files, or directories) to it, and then
- * start() it.  This is generally done at the top of your application in
- * its main class.
+ * 1). To reference config management functions, you first call config
+ * as a function: `config().xyz`
  *
- * ```
- * const config = require("AwesomeConfig");
- * config.add( ... );
- * config.start();
- * ```
+ * 2). To reference config values, which we will see below, you reference
+ * config as an object: `config.xyz`
  *
- * Once AwesomeConfig has been started, the second phase begins: usage.
- * You use AwesomeConfig from there on out by requiring it, and then
- * simply by pulling the values out you want, just like any JavaScript
- * object.
+ * It begins by calling `config().init()`. Each time you call `init()` it creates
+ * a new scope, based on the module from which you call it. (If, you
+ * call `config().init()` from the same module, the scope remains the same.)
  *
  * ```
- * let abcxyz = config.abc.xyz;
+ * let config = require("AwesomeConfig");
+ * config().init();
  * ```
  *
- * Once config.start() has been called it is impossible to mutate
- * AwesomeConfig or to add additional configuration to AwesomeConfig.
- * However, in some testing cases this is necessary, so it is possible
- * to stop AwesomeConfig once started; the `config.$$stop()` method
- * will pust AwesomeConfig back into setup mode and you may `add()`
- * at that point. Generally speaking though, that is bad practice
- * and should be avoided.
+ * Once initialized you can add configuration details to the config object.
  *
+ * ```
+ * let config = require("AwesomeConfig");
+ * config().init();
+ * config().add(...);
+ * ```
+ *
+ * You can add config in a variety of ways:
+ *
+ * 	**Object** - A plain javascript object can be passed to config.
+ *
+ *  **JSON String** - A JSON string can be passed to config and it will parse
+ *  it into a JSON Object and use that as per above. THe string must parse and
+ *  it must parse into an object not an array.
+ *
+ *  **Filename** - You can pass a resolved filename in and AwesomeConfig will
+ *  read its contents and parse it and use that.
+ *
+ *  **Directory** - Passing a directory will cause AwesomeConfig to load all
+ *  *.cfg files in that directory, in alphabetical order, into config.
+ *
+ * After all your configuration has been added, you can start config with
+ * `config().start()`. Once config has been started, you cannot add any more
+ * confguration properties to it, so make sure everything is added before
+ * starting.
+ *
+ * Please see (AwesomeConfig's documentation)[https://github.com/awesomeeng/AwesomeConfig]
+ * for more details.
  */
 class AwesomeConfig {
-	constructor(options) {
-		options = Object.assign({
-			paths: [],
-			fileEncoding: "utf-8"
-		},options);
-
+	/**
+	 * @constructor
+	 */
+	constructor() {
 		let instances = {};
 
 		Log.info && Log.info("AwesomeConfig","Installed.");
@@ -93,7 +106,7 @@ class AwesomeConfig {
 			return apply();
 		};
 
-		const add = function add(content,defaultConditions="",encoding=options.encoding) {
+		const add = function add(content,defaultConditions="",encoding="utf-8") {
 			let id = getId();
 			let instance = getInstance(id);
 			if (!instance) throw new Error("init() must be called before add().");

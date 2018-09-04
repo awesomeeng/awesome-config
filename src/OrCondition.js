@@ -7,7 +7,20 @@ const AbstractCondition = require("./AbstractCondition");
 const $LEFT = Symbol("left");
 const $RIGHT = Symbol("right");
 
+/**
+ * represents an OR condition that has a left and right side, each of which are
+ * conditions in their own right. In order for an OR condition to be true,
+ * either the left or right conditions must resolve to true.
+ *
+ * @extends AbstractCondition
+ */
 class OrCondition extends AbstractCondition {
+	/**
+	 * Create a new OR condition.
+	 *
+	 * @param {AbstractCondition} left  
+	 * @param {AbstractCondition} right 
+	 */
 	constructor(left,right) {
 		super();
 		if (!left || !(left instanceof AbstractCondition)) throw new Error("Invalid left expression.");
@@ -17,10 +30,20 @@ class OrCondition extends AbstractCondition {
 		this[$RIGHT] = right;
 	}
 
+	/**
+	 * Returns the left condition.
+	 *
+	 * @return {AbstrctCondition}
+	 */
 	get left() {
 		return this[$LEFT];
 	}
 
+	/**
+	 * Returns the right condition.
+	 *
+	 * @return {AbstrctCondition}
+	 */
 	get right() {
 		return this[$RIGHT];
 	}

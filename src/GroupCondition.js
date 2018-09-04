@@ -6,7 +6,17 @@ const AbstractCondition = require("./AbstractCondition");
 
 const $EXPRESSION = Symbol("expression");
 
-class AndCondition extends AbstractCondition {
+/**
+ * A conitino that groups other conditions into a cohesive set.
+ *
+ * @extends AbstractCondition
+ */
+class GroupCondition extends AbstractCondition {
+	/**
+	 * Create a group condition from a set of other conditions.
+	 *
+	 * @param {string} expression
+	 */
 	constructor(expression) {
 		super();
 		if (!expression || !(expression instanceof AbstractCondition)) throw new Error("Invalid expression expression.");
@@ -14,6 +24,11 @@ class AndCondition extends AbstractCondition {
 		this[$EXPRESSION] = expression;
 	}
 
+	/**
+	 * Returns the inner condition of this group condition.
+	 *
+	 * @return {string}
+	 */
 	get expression() {
 		return this[$EXPRESSION];
 	}
@@ -43,4 +58,4 @@ class AndCondition extends AbstractCondition {
 	}
 }
 
-module.exports = AndCondition;
+module.exports = GroupCondition;

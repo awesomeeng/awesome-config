@@ -18,6 +18,12 @@ const $CONFIG = Symbol("config");
 const $PARSER = Symbol("parser");
 const $RESOLVER = Symbol("resolver");
 
+/**
+ * Creates a scope for config. Config scopes are bound to the module which
+ * loads it and all descendant calls. So if you create module XYZ and do
+ * `config().init()` inside of it, all calls that derive from XYZ will use
+ * that config, until something else calls init.
+ */
 class ConfigInstance {
 	constructor(id) {
 		this[$ID] = id;
@@ -30,30 +36,67 @@ class ConfigInstance {
 		Log.debug && Log.debug("AwesomeConfigInstance","Instance "+id+" initialized.");
 	}
 
+	/**
+	 * Id of this instance/scope.
+	 *
+	 * @return {[type]} [description]
+	 */
 	get id() {
 		return this[$ID];
 	}
 
+	/**
+	 * Returns true of this instance/scope has been started and nothing
+	 * else can be added to it.
+	 *
+	 * @return {[type]} [description]
+	 */
 	get started() {
 		return this[$CONFIG]!==null;
 	}
 
+	/**
+	 * Return the origin of all added config data.
+	 *
+	 * @return {[type]} [description]
+	 */
 	get sources() {
 		return this[$SOURCES];
 	}
 
+	/**
+	 * Return the underlying config object.
+	 *
+	 * @return {[type]} [description]
+	 */
 	get config() {
 		return this.started && this[$CONFIG] || null;
 	}
 
+	/**
+	 * Returns the parse being used by this config instance.
+	 *
+	 * @return {[type]} [description]
+	 */
 	get parser() {
 		return this[$PARSER];
 	}
 
+	/**
+	 * Returns the resolver being used by this config instance.
+	 *
+	 * @return {[type]} [description]
+	 */
 	get resolver() {
 		return this[$RESOLVER];
 	}
 
+	/**
+	 * Starts this config instance as running which means no more
+	 * config details can be added to it.
+	 *
+	 * @return {[type]} [description]
+	 */
 	start() {
 		if (this.started) return;
 
@@ -74,6 +117,12 @@ class ConfigInstance {
 		Log.debug && Log.debug("AwesomeConfigInstance","Instance "+this.id+" initialized.");
 	}
 
+	/**
+	 * Stops this config instance running. Note that one stopped new
+	 * items can be added.
+	 *
+	 * @return {[type]} [description]
+	 */
 	stop() {
 		if (!this.started) return;
 
@@ -81,6 +130,10 @@ class ConfigInstance {
 		Log.debug && Log.debug("AwesomeConfigInstance","Instance "+this.id+" stopped.");
 	}
 
+	/**
+	 * Called when config is not started, this removes all previous
+	 * config items, resetting configs state to nothing.
+	 */
 	reset() {
 		if (this.started) throw new Error("Cannot reset() while started. stop() first.");
 		this[$SOURCES] = [];
@@ -173,7 +226,6 @@ class ConfigInstance {
 
 		Log.debug && Log.debug("AwesomeConfigInstance","Instance "+this.id+" added configuration from origin "+origin+".");
 	}
-
 }
 
 module.exports = ConfigInstance;

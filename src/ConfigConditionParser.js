@@ -27,7 +27,19 @@ const conditions = [];
 	});
 })();
 
+/**
+ * Parses a condition string and returns a single condition back. The returned
+ * condition can contain a set of nested conditions are needed.
+ *
+ * @extends AwesomeUtils
+ */
 class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
+	/**
+	 * Parse a condition string.
+	 *
+	 * @param  {string} content
+	 * @return {AbstractCondition}         
+	 */
 	parse(content) {
 		super.parse(content);
 

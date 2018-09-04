@@ -7,7 +7,20 @@ const AbstractCondition = require("./AbstractCondition");
 const $LEFT = Symbol("left");
 const $RIGHT = Symbol("right");
 
+/**
+ * represents an AND condition that has a left and right side, each of which are
+ * conditions in their own right. In order for an AND condition to be true
+ * both the left and right conditions must also be true.
+ *
+ * @extends AbstractCondition
+ */
 class AndCondition extends AbstractCondition {
+	/**
+	 * Creates a AND condition.
+	 *
+	 * @param {AbstractCondition} left
+	 * @param {AbstractCondition} right
+	 */
 	constructor(left,right) {
 		super();
 		if (!left || !(left instanceof AbstractCondition)) throw new Error("Invalid left expression.");
@@ -17,10 +30,20 @@ class AndCondition extends AbstractCondition {
 		this[$RIGHT] = right;
 	}
 
+	/**
+	 * Returns the left condition.
+	 *
+	 * @return {AbstractCondition}
+	 */
 	get left() {
 		return this[$LEFT];
 	}
 
+	/**
+	 * Returns the right condition.
+	 *
+	 * @return {AbstractCondition}
+	 */
 	get right() {
 		return this[$RIGHT];
 	}

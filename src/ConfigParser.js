@@ -11,6 +11,13 @@ const ConfigSource = require("./ConfigSource");
 const $ORIGIN = Symbol("origin");
 const $DEFAULT_CONDITIONS = Symbol("defaultConditions");
 
+/**
+ * Parser a configuration string using AwesomeConfig's custom config format.
+ *
+ * Please see (AwesomeConfig's documentation)[https://github.com/awesomeeng/AwesomeConfig]
+ * for more details.
+ * @extends AwesomeUtils.Parser.AbstractParser
+ */
 class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 	constructor() {
 		super();
