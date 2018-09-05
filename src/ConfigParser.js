@@ -2,8 +2,6 @@
 
 "use strict";
 
-const Lodash = require("lodash");
-
 const AwesomeUtils = require("AwesomeUtils");
 
 const ConfigSource = require("./ConfigSource");
@@ -193,7 +191,7 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 			try {
 				let obj = JSON.parse(json);
 				if (obj===undefined || obj===null) obj = null;
-				Lodash.set(root,key,obj);
+				AwesomeUtils.Object.set(root,key,obj);
 				if (this.peek()===",") this.pop();
 			}
 			catch (ex) {
@@ -206,7 +204,7 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 			try {
 				let obj = JSON.parse(json);
 				if (obj===undefined || obj===null) obj = null;
-				Lodash.set(root,key,obj);
+				AwesomeUtils.Object.set(root,key,obj);
 				if (this.peek()===",") this.pop();
 			}
 			catch (ex) {
@@ -217,7 +215,7 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 			let value = this.parseValue();
 			if (value===undefined) this.error("Empty value in key/value.");
 
-			Lodash.set(root,key,value);
+			AwesomeUtils.Object.set(root,key,value);
 		}
 	}
 
@@ -292,7 +290,7 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 		try {
 			let obj = JSON.parse(json);
 			if (obj===undefined || obj===null) return;
-			Lodash.merge(root,obj);
+			AwesomeUtils.Object.extend(root,obj);
 		}
 		catch (ex) {
 			this.error("JSON parsing error",pos);

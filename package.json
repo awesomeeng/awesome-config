@@ -13,7 +13,7 @@
         "node": ">=10.5.0"
     },
     "dependencies": {
-        "lodash": "^4.17.10"
+        "AwesomeUtils": "~1.0.0"
     },
     "devDependencies": {
         "mocha": "*"
