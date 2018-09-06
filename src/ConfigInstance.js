@@ -192,20 +192,16 @@ class ConfigInstance {
 			sources = sources.concat([new ConfigSource(origin,content,defaultConditions)]);
 		}
 		else if (typeof content==="string") {
-			let stat = null;
-			try {
-				stat = FS.statSync(content);
-			}
-			catch (ex) {
-				stat = null;
-			}
+			let resolved = resolve(content);
+			let filename,stat;
+			if (resolved) ({stat,filename} = resolved);
 			if (!stat) {
 				origin = AwesomeUtils.Module.sourceAndLine(2);
 				sources = sources.concat(this.parser.parse(origin,content,defaultConditions));
 				if (content) valid = true;
 			}
 			else if (stat && stat.isDirectory()) {
-				let dir = content;
+				let dir = filename;
 				FS.readdirSync(content).forEach((filename)=>{
 					filename = Path.resolve(dir,filename);
 					if (filename.endsWith(".cfg")) this.add(filename,defaultConditions,encoding);
@@ -214,8 +210,8 @@ class ConfigInstance {
 				});
 			}
 			else if (stat && stat.isFile()) {
-				origin = content;
-				content = FS.readFileSync(content,encoding);
+				origin = filename;
+				content = FS.readFileSync(filename,encoding);
 				sources = sources.concat(this.parser.parse(origin,content,defaultConditions));
 				if (content) valid = true;
 			}
@@ -227,5 +223,47 @@ class ConfigInstance {
 		Log.debug && Log.debug("AwesomeConfigInstance","Instance "+this.id+" added configuration from origin "+origin+".");
 	}
 }
+
+/**
+ * Given some filename, resolve that filename relative to your current working directory, or
+ * if that fails, against the directory of the calling module.
+ *
+ * @param  {string} filename
+ * @return {string}
+ */
+const resolve = function resolve(filename) {
+	const getStat = (f)=>{
+		try {
+			return FS.statSync(f);
+		}
+		catch (ex) {
+			return null;
+		}
+	};
+
+	let path,stat;
+
+	// try the filename relative to process.cwd()
+	path = Path.resolve(process.cwd(),filename);
+	stat = getStat(path);
+	if (stat) return {
+		filename: path,
+		stat
+	};
+
+	// try the filename relative to the module parent
+	if (module && module.parent) {
+		path = AwesomeUtils.Module.resolve(module && module.parent && module.parent.parent || module && module.parent || module,filename);
+		stat = getStat(path);
+		if (stat) return {
+			filename: path,
+			stat
+		};
+	}
+
+	// fail
+	return null;
+};
+
 
 module.exports = ConfigInstance;
