@@ -164,6 +164,19 @@ class AwesomeConfig {
 			return [].concat(Object.getOwnPropertyNames(instance.config),["prototype"]);
 		};
 
+		const toString = function toString() {
+			let id = getId();
+			let instance = getInstance(id);
+			if (!instance) return undefined;
+			if (!instance.started) return undefined;
+
+			let s = "";
+			Object.keys(instance.config).forEach((key)=>{
+				s += (s?",\n":"")+"  \""+key+"\": "+JSON.stringify(instance.config[key],null,2).replace(/\n/g,"\n  ");
+			});
+			return "{\n"+s+"\n}";
+		};
+
 		const apply = function config() {
 			let id = getId();
 			let instance = getInstance(id);
@@ -179,7 +192,8 @@ class AwesomeConfig {
 				started,
 				add,
 				sources,
-				reset
+				reset,
+				toString
 			};
 		};
 
