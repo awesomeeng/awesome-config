@@ -45,8 +45,6 @@ class SpecialStrings {
 		if (lc==="exec") return process.execPath;
 		if (lc==="execpath") return process.execPath;
 		if (lc==="cwd") return process.cwd();
-		if (lc==="uid") return process.getuid();
-		if (lc==="gid") return process.getgid();
 		if (lc==="version") return process.version;
 		if (lc==="main") return process.mainModule.filename;
 		if (lc==="script") return process.mainModule.filename;
@@ -57,7 +55,7 @@ class SpecialStrings {
 	resolveOs(flavor) {
 		let lc = flavor.toLowerCase();
 		if (lc==="arch") return OS.arch();
-		if (lc==="platform") OS.platform();
+		if (lc==="platform") return OS.platform();
 		if (lc==="cpus") return OS.cpus().length;
 		if (lc==="homedir") return OS.homedir();
 		if (lc==="home") return OS.homedir();

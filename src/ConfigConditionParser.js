@@ -2,32 +2,23 @@
 
 "use strict";
 
-const FS = require("fs");
-const Path = require("path");
-
 const AwesomeUtils = require("AwesomeUtils");
 
-const AbstractCondition = require("./AbstractCondition");
-const NotCondition = require("./NotCondition");
-const AndCondition = require("./AndCondition");
-const OrCondition = require("./OrCondition");
-const GroupCondition = require("./GroupCondition");
+const AbstractCondition = require("./conditions/AbstractCondition");
+
+const NotCondition = require("./conditions/NotCondition");
+const AndCondition = require("./conditions/AndCondition");
+const OrCondition = require("./conditions/OrCondition");
+const GroupCondition = require("./conditions/GroupCondition");
+
+const TrueCondition = require("./conditions/TrueCondition");
+const FalseCondition = require("./conditions/FalseCondition");
+
+const BooleanCondition = require("./conditions/BooleanCondition");
+const NumberCondition = require("./conditions/NumberCondition");
+const StringCondition = require("./conditions/StringCondition");
 
 const SpecialStrings = require("./SpecialStrings");
-
-const conditions = [];
-(function(){
-	let srcdir = AwesomeUtils.Module.resolve(module,"./conditions");
-	FS.readdirSync(srcdir).forEach((filename)=>{
-		if (!filename.endsWith(".js") && !filename.endsWith(".node")) return;
-		filename = Path.resolve(srcdir,filename);
-		let cls = require(filename);
-		if (!cls) return;
-		if (!AbstractCondition.isPrototypeOf(cls)) return;
-
-		conditions.push(cls);
-	});
-})();
 
 /**
  * Parses a condition string and returns a single condition back. The returned
@@ -138,7 +129,7 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 
 		if (!text) this.error("Expected field.");
 
-		let field = this.getAssociatedFieldObject(text);
+		let field = this.getConditionObject(text);
 		if (!field) this.error("Unknown field '"+text+"'.");
 
 		if (field.operator!==AbstractCondition.NOT_REQUIRED) this.parseFieldOperator(field);
@@ -306,24 +297,16 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 		return expression;
 	}
 
-	getAssociatedFieldObject(field) {
-		if (field.indexOf(":")>-1) return this.getSpecialStringFieldObject(field);
+	getConditionObject(field) {
+		let lc = field.toLowerCase();
+		if (lc==="true") return new TrueCondition();
+		if (lc==="false") return new FalseCondition();
 
-		return conditions.reduce((match,condition)=>{
-			if (match) return match;
-			try {
-				return new condition(field);
-			}
-			catch (ex) {
-				return null;
-			}
-		},null);
-	}
-
-	getSpecialStringFieldObject(field) {
 		try {
 			let value = SpecialStrings.resolve(field);
-			console.log(1,field,value);
+			if (typeof value==="boolean") return new BooleanCondition(value,field);
+			if (typeof value==="number") return new NumberCondition(value,field);
+			if (typeof value==="string") return new StringCondition(value,field);
 		}
 		catch (ex) {
 			if (ex===SpecialStrings.UNRESOLVED) return this.error("Condition contained a field that could not resolve: "+field);

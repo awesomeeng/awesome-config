@@ -450,12 +450,10 @@ In addition to referencing specific portions of config using variables, you can 
  - **${process:cwd}**: Returns the current working directory.
  - **${process:exec}**: returns the executable (usually "node" or "node.exe") that ran node.
  - **${process:execPath}**: returns the executable (usually "node" or "node.exe") that ran node.
- - **${process:gid}**: Returns the current group ID for the current user. On Windows this will be -1.
  - **${process:main}**: Returns the script executed by node at startup.
  - **${process:pid}**: returns the process pid.
  - **${process:ppid}**: returns te process parent pid.
  - **${process:script}**: Returns the script executed by node at startup.
- - **${process:uid}**: Returns the current user ID for the current user. On Windows this will be -1.
  - **${process:version}**: Returns node.js version, as a string.
 
  - **${os:arch}**: Returns the OS arch string, currently one of the following: arm | arm64 | ia32 | mips | mipsel | ppc | ppc64 | s390 | s390x | x32 | x64
@@ -464,7 +462,6 @@ In addition to referencing specific portions of config using variables, you can 
  - **${os:home}**: Returns the home directory path.
  - **${os:homedir}**: Returns the home directory path.
  - **${os:platform}**: Returns the OS platform string, currently one of the following:  aix | darwin | freebsd | linux | openbsd | sunos | win32
-
  - **${os:user}**: Returns the OS family name.
  - **${os:username}**: Returns the OS family name.
 

@@ -2,12 +2,12 @@
 
 "use strict";
 
-const AbstractCondition = require("../AbstractCondition");
+const AbstractCondition = require("./AbstractCondition");
 
 class TrueCondition extends AbstractCondition {
 	constructor(field) {
 		super();
-		if (field.toLowerCase()!=="false") throw new Error("Does not match condition.");
+		if (field && typeof field==="string" && field.toLowerCase()!=="false") throw new Error("Does not match condition.");
 	}
 
 	get operator() {

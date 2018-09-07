@@ -1,3 +1,5 @@
+
+
 // (c) 2018, The Awesome Engineering Company, https://awesomeneg.com
 
 /*
@@ -6,28 +8,24 @@
 
 "use strict";
 
-const OS = require("os");
 const assert = require("assert");
 // require("AwesomeLog").start();
 
-const AbstractCondition = require("../src/AbstractCondition");
 const ConfigConditionParser = require("../src/ConfigConditionParser");
+
+const AbstractCondition = require("../src/conditions/AbstractCondition");
 
 const TrueCondition = require("../src/conditions/TrueCondition");
 const FalseCondition = require("../src/conditions/FalseCondition");
 
-const NotCondition = require("../src/NotCondition");
-const AndCondition = require("../src/AndCondition");
-const OrCondition = require("../src/OrCondition");
-const GroupCondition = require("../src/GroupCondition");
+const NotCondition = require("../src/conditions/NotCondition");
+const AndCondition = require("../src/conditions/AndCondition");
+const OrCondition = require("../src/conditions/OrCondition");
+const GroupCondition = require("../src/conditions/GroupCondition");
 
-const OSCondition = require("../src/conditions/OSCondition");
-const HostnameCondition = require("../src/conditions/HostnameCondition");
-const UnameCondition = require("../src/conditions/UnameCondition");
-const ArchCondition = require("../src/conditions/ArchCondition");
-const MachineCondition = require("../src/conditions/MachineCondition");
-const CPUSCondition = require("../src/conditions/CPUSCondition");
-const CWDCondition = require("../src/conditions/CWDCondition");
+const BooleanCondition = require("../src/conditions/BooleanCondition");
+const NumberCondition = require("../src/conditions/NumberCondition");
+const StringCondition = require("../src/conditions/StringCondition");
 
 describe("Conditions",function(){
 	it("true",function(){
@@ -110,80 +108,123 @@ describe("Conditions",function(){
 		assert(condition.resolve());
 	});
 
-	it("os",function(){
-		let parser = new ConfigConditionParser();
-		let condition = parser.parse("os==="+OS.platform());
+	it("boolean",function(){
+		assert(BooleanCondition);
 
-		assert(condition);
-		assert(condition instanceof AbstractCondition);
-		assert(condition instanceof OSCondition);
+		const test = (source,operator,value) => {
+			let c = new BooleanCondition(source,"test");
+			c.operator = operator;
+			c.value = value;
+			return c.resolve();
+		};
 
-		assert(condition.resolve());
+		assert(test(true,"=",true));
+		assert(test(true,"==",true));
+		assert(test(true,"===",true));
+		assert(!test(true,"!=",true));
+		assert(!test(true,"!==",true));
+
+		assert(!test(true,"=",false));
+		assert(!test(true,"==",false));
+		assert(!test(true,"===",false));
+		assert(test(true,"!=",false));
+		assert(test(true,"!==",false));
+
+		assert(test(false,"=",false));
+		assert(test(false,"==",false));
+		assert(test(false,"===",false));
+		assert(!test(false,"!=",false));
+		assert(!test(false,"!==",false));
+
+		assert(!test(false,"=",true));
+		assert(!test(false,"==",true));
+		assert(!test(false,"===",true));
+		assert(test(false,"!=",true));
+		assert(test(false,"!==",true));
 	});
 
-	it("arch",function(){
-		let parser = new ConfigConditionParser();
-		let condition = parser.parse("arch==="+OS.arch());
+	it("number",function(){
+		assert(NumberCondition);
 
-		assert(condition);
-		assert(condition instanceof AbstractCondition);
-		assert(condition instanceof ArchCondition);
+		const test = (source,operator,value) => {
+			let c = new NumberCondition(source,"test");
+			c.operator = operator;
+			c.value = value;
+			return c.resolve();
+		};
 
-		assert(condition.resolve());
+		assert(test(8675309,"=",8675309));
+		assert(test(8675309,"==",8675309));
+		assert(test(8675309,"===",8675309));
+		assert(!test(8675309,"!=",8675309));
+		assert(!test(8675309,"!==",8675309));
+
+		assert(!test(8675309,"=",1234567));
+		assert(!test(8675309,"==",1234567));
+		assert(!test(8675309,"===",1234567));
+		assert(test(8675309,"!=",1234567));
+		assert(test(8675309,"!==",1234567));
+
+		assert(!test(1,">",1));
+		assert(!test(1,">",2));
+		assert(test(2,">",1));
+		assert(test(1,">=",1));
+		assert(!test(1,">=",2));
+		assert(test(2,">=",1));
+		assert(!test(1,"<",1));
+		assert(test(1,"<",2));
+		assert(!test(2,"<",1));
+		assert(test(1,"<=",1));
+		assert(test(1,"<=",2));
+		assert(!test(2,"<=",1));
 	});
 
-	it("uname",function(){
-		let parser = new ConfigConditionParser();
-		let condition = parser.parse("uname==="+OS.type());
+	it("string",function(){
+		const test = (source,operator,value) => {
+			let c = new StringCondition(source,"test");
+			c.operator = operator;
+			c.value = value;
+			return c.resolve();
+		};
 
-		assert(condition);
-		assert(condition instanceof AbstractCondition);
-		assert(condition instanceof UnameCondition);
+		assert(test("red,green,blue","=","red,green,blue"));
+		assert(test("red,green,blue","==","red,green,blue"));
+		assert(test("red,green,blue","===","red,green,blue"));
+		assert(!test("red,green,blue","!=","red,green,blue"));
+		assert(!test("red,green,blue","!==","red,green,blue"));
 
-		assert(condition.resolve());
-	});
+		assert(!test("red,green,blue","=","one,two,three"));
+		assert(!test("red,green,blue","==","one,two,three"));
+		assert(!test("red,green,blue","===","one,two,three"));
+		assert(test("red,green,blue","!=","one,two,three"));
+		assert(test("red,green,blue","!==","one,two,three"));
 
-	it("hostname",function(){
-		let parser = new ConfigConditionParser();
-		let condition = parser.parse("hostname==="+OS.hostname());
+		assert(test("red,green,blue","^","red"));
+		assert(test("red,green,blue","~","red"));
+		assert(!test("red,green,blue","$","red"));
+		assert(!test("red,green,blue","!^","red"));
+		assert(!test("red,green,blue","!~","red"));
+		assert(test("red,green,blue","!$","red"));
 
-		assert(condition);
-		assert(condition instanceof AbstractCondition);
-		assert(condition instanceof HostnameCondition);
+		assert(!test("red,green,blue","^","green"));
+		assert(test("red,green,blue","~","green"));
+		assert(!test("red,green,blue","$","green"));
+		assert(test("red,green,blue","!^","green"));
+		assert(!test("red,green,blue","!~","green"));
+		assert(test("red,green,blue","!$","green"));
 
-		assert(condition.resolve());
-	});
+		assert(!test("red,green,blue","^","blue"));
+		assert(test("red,green,blue","~","blue"));
+		assert(test("red,green,blue","$","blue"));
+		assert(test("red,green,blue","!^","blue"));
+		assert(!test("red,green,blue","!~","blue"));
+		assert(!test("red,green,blue","!$","blue"));
 
-	it("machine",function(){
-		let parser = new ConfigConditionParser();
-		let condition = parser.parse("machine==="+OS.hostname().split(".")[0] || OS.hostname());
-
-		assert(condition);
-		assert(condition instanceof AbstractCondition);
-		assert(condition instanceof MachineCondition);
-
-		assert(condition.resolve());
-	});
-
-	it("cpus",function(){
-		let parser = new ConfigConditionParser();
-		let condition = parser.parse("cpus==="+OS.cpus().length);
-
-		assert(condition);
-		assert(condition instanceof AbstractCondition);
-		assert(condition instanceof CPUSCondition);
-
-		assert(condition.resolve());
-	});
-
-	it("cwd",function(){
-		let parser = new ConfigConditionParser();
-		let condition = parser.parse("cwd==="+process.cwd());
-
-		assert(condition);
-		assert(condition instanceof AbstractCondition);
-		assert(condition instanceof CWDCondition);
-
-		assert(condition.resolve());
+		assert(!test("red,green,blue","^","orange"));
+		assert(!test("red,green,blue","~","orange"));
+		assert(!test("red,green,blue","$","orange"));
+		assert(test("red,green,blue","!^","orange"));
+		assert(test("red,green,blue","!~","orange"));
+		assert(test("red,green,blue","!$","orange"));
 	});
 });

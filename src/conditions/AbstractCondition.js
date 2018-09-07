@@ -8,8 +8,8 @@ const $OPERATOR = Symbol("operator");
 const $VALUE = Symbol("value");
 
 /**
- * Defines the shape of each condition.  A condition must implement the `name` getter,
- * and the `isValidOperator(op)` and `toSTring()` and `resolve()` methods.
+ * Defines the shape of each condition.  A condition must implement
+ * the `isValidOperator(op)` and `toString()` and `resolve()` methods.
  */
 class AbstractCondition {
 	/**
@@ -65,15 +65,6 @@ class AbstractCondition {
 	 */
 	set value(x) {
 		this[$VALUE] = x;
-	}
-
-	/**
-	 * Returns a nice string name for this condition.
-	 *
-	 * @return {string}
-	 */
-	get name() {
-		throw new Error("Not implemented. AbstractCondition requires this method be implemented.");
 	}
 
 	/**
