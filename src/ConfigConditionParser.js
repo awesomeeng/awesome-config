@@ -13,6 +13,8 @@ const AndCondition = require("./AndCondition");
 const OrCondition = require("./OrCondition");
 const GroupCondition = require("./GroupCondition");
 
+const SpecialStrings = require("./SpecialStrings");
+
 const conditions = [];
 (function(){
 	let srcdir = AwesomeUtils.Module.resolve(module,"./conditions");
@@ -38,7 +40,7 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 	 * Parse a condition string.
 	 *
 	 * @param  {string} content
-	 * @return {AbstractCondition}         
+	 * @return {AbstractCondition}
 	 */
 	parse(content) {
 		super.parse(content);
@@ -48,6 +50,10 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 
 	isPathCharacter(c) {
 		return this.isLetter(c) || this.isDigit(c) || c==="." || c==="_" || c==="$" || c==="-";
+	}
+
+	isFieldCharacter(c) {
+		return this.isPathCharacter(c) || c===":";
 	}
 
 	isQuoteCharacter(c) {
@@ -122,7 +128,7 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 			let next = this.peek();
 			if (next===undefined) break;
 
-			if (this.isPathCharacter(next)) {
+			if (this.isFieldCharacter(next)) {
 				text += this.pop();
 			}
 			else {
@@ -301,6 +307,8 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 	}
 
 	getAssociatedFieldObject(field) {
+		if (field.indexOf(":")>-1) return this.getSpecialStringFieldObject(field);
+
 		return conditions.reduce((match,condition)=>{
 			if (match) return match;
 			try {
@@ -310,6 +318,17 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 				return null;
 			}
 		},null);
+	}
+
+	getSpecialStringFieldObject(field) {
+		try {
+			let value = SpecialStrings.resolve(field);
+			console.log(1,field,value);
+		}
+		catch (ex) {
+			if (ex===SpecialStrings.UNRESOLVED) return this.error("Condition contained a field that could not resolve: "+field);
+			else throw ex;
+		}
 	}
 }
 

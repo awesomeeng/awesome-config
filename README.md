@@ -440,19 +440,34 @@ Variables get replaced by the exact content they are referencing.  If the variab
 In addition to referencing specific portions of config using variables, you can also use variables to get a number of special values as described below:
 
  - **${env:xyz}**: Returns the envionment variables specified, xyz in this case.
- - **${hostname:name}**: Returns the first part of the hostname strig, everything up tot he first dot.
- - **${hostname:full}**: returns the entire hostname string.
- - **${hostname:fqdn}**: same as `${hostname:full}`.
+
  - **${hostname:domain}**: returns the last two parts of the hostname, the "google.com" portion.
+ - **${hostname:fqdn}**: same as `${hostname:full}`.
+ - **${hostname:full}**: returns the entire hostname string.
+ - **${hostname:name}**: Returns the first part of the hostname strig, everything up tot he first dot.
+
+ - **${process:args}**: returns the arguments passed to the process, as a string.
+ - **${process:cwd}**: Returns the current working directory.
+ - **${process:exec}**: returns the executable (usually "node" or "node.exe") that ran node.
+ - **${process:execPath}**: returns the executable (usually "node" or "node.exe") that ran node.
+ - **${process:gid}**: Returns the current group ID for the current user. On Windows this will be -1.
+ - **${process:main}**: Returns the script executed by node at startup.
  - **${process:pid}**: returns the process pid.
  - **${process:ppid}**: returns te process parent pid.
- - **${process:args}**: returns the arguments passed to the process, as a string.
- - **${process:exec}**: returns the executable (usually "node" or "node.exe") that ran node.
  - **${process:script}**: Returns the script executed by node at startup.
- - **${os:name}**: Returns the OS name such as "windows", "darwin", "linux", etc.
- - **${os:cpus}**: Returns the number of CPUs in the system.
- - **${os:family}**: Returns the OS family name.
+ - **${process:uid}**: Returns the current user ID for the current user. On Windows this will be -1.
+ - **${process:version}**: Returns node.js version, as a string.
+
+ - **${os:arch}**: Returns the OS arch string, currently one of the following: arm | arm64 | ia32 | mips | mipsel | ppc | ppc64 | s390 | s390x | x32 | x64
  - **${os:bits}**: Returns the number of bits in the system (32 or 64)
+ - **${os:cpus}**: Returns the number of CPUs reported to node.js
+ - **${os:home}**: Returns the home directory path.
+ - **${os:homedir}**: Returns the home directory path.
+ - **${os:platform}**: Returns the OS platform string, currently one of the following:  aix | darwin | freebsd | linux | openbsd | sunos | win32
+
+ - **${os:user}**: Returns the OS family name.
+ - **${os:username}**: Returns the OS family name.
+
  - **${string:encoding}**: Returns the default encoding type for strings, usually "utf-8".
  - **${string:eol}**: Returns the system EOL character like "\n".
 

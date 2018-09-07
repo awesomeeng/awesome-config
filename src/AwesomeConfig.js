@@ -183,6 +183,9 @@ class AwesomeConfig {
 			let initialized = !!instance;
 			let started = instance && instance.started || false;
 			let sources = instance && instance.sources || [];
+			sources = sources.map((source)=>{
+				return source.origin;
+			});
 
 			return {
 				init,

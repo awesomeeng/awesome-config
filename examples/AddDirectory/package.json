@@ -1,0 +1,13 @@
+{
+    "name": "AwesomeConfig/Examples/AddDirectory",
+    "version": "1.0.0",
+    "author": "the awesome engineering company",
+    "license": "(c) 2018, The Awesome Engineering Company, inc",
+    "main": "./entry.js",
+    "engines": {
+        "node": ">=10.5.0"
+    },
+    "dependencies": {
+        "@AwesomeEng/AwesomeConfig": "*"
+    }
+}

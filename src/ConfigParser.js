@@ -395,6 +395,17 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 		if (value.startsWith("'") && value.endsWith("'")) return value.slice(1,-1);
 		return value;
 	}
+
+	error(msg,pos=null) {
+		try {
+			super.error(msg,pos);
+		}
+		catch (ex) {
+			ex.message = ex.message.replace(/Error\sat/,"Error in "+this.origin+" at");
+			throw ex;
+		}
+
+	}
 }
 
 module.exports = ConfigParser;

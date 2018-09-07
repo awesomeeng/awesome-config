@@ -202,12 +202,12 @@ class ConfigInstance {
 			}
 			else if (stat && stat.isDirectory()) {
 				let dir = filename;
-				FS.readdirSync(content).forEach((filename)=>{
+				FS.readdirSync(dir).forEach((filename)=>{
 					filename = Path.resolve(dir,filename);
 					if (filename.endsWith(".cfg")) this.add(filename,defaultConditions,encoding);
-					sources = [];
-					valid = true;
 				});
+				sources = [];
+				valid = true;
 			}
 			else if (stat && stat.isFile()) {
 				origin = filename;
@@ -243,6 +243,17 @@ const resolve = function resolve(filename) {
 
 	let path,stat;
 
+	// try the filename relative to the module parent
+	if (module && module.parent) {
+		if (filename==="." || filename==="./" || filename==="/\\") path = Path.dirname(module && module.parent && module.parent.parent && module.parent.parent.filename || module && module.parent && module.parent.filename || filename);
+		else path = AwesomeUtils.Module.resolve(module && module.parent && module.parent.parent || module && module.parent,filename);
+		stat = getStat(path);
+		if (stat) return {
+			filename: path,
+			stat
+		};
+	}
+
 	// try the filename relative to process.cwd()
 	path = Path.resolve(process.cwd(),filename);
 	stat = getStat(path);
@@ -250,16 +261,6 @@ const resolve = function resolve(filename) {
 		filename: path,
 		stat
 	};
-
-	// try the filename relative to the module parent
-	if (module && module.parent) {
-		path = AwesomeUtils.Module.resolve(module && module.parent && module.parent.parent || module && module.parent || module,filename);
-		stat = getStat(path);
-		if (stat) return {
-			filename: path,
-			stat
-		};
-	}
 
 	// fail
 	return null;
