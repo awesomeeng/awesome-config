@@ -3,7 +3,7 @@
 "use strict";
 
 const AwesomeUtils = require("AwesomeUtils");
-const Log = require("AwesomeLog");
+const Log = require("awesome-log");
 
 const ConfigInstance = require("./ConfigInstance");
 
@@ -24,14 +24,14 @@ const ConfigInstance = require("./ConfigInstance");
  * call `config().init()` from the same module, the scope remains the same.)
  *
  * ```
- * let config = require("AwesomeConfig");
+ * let config = require("awesome-config");
  * config().init();
  * ```
  *
  * Once initialized you can add configuration details to the config object.
  *
  * ```
- * let config = require("AwesomeConfig");
+ * let config = require("awesome-config");
  * config().init();
  * config().add(...);
  * ```

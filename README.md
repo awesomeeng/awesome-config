@@ -35,7 +35,7 @@ AwesomeConfig provides...
 
 Couldn't be easier.
 ```
-npm install --save @awesomeeng/AwesomeConfig
+npm install --save @awesomeeng/awesome-config
 ```
 
 ## Setup
@@ -49,13 +49,13 @@ You initially Setup configuration with 4 easy steps...
 1). Require AwesomeConfig:
 
 ```
-const config = require("AwesomeConfig");
+const config = require("awesome-config");
 ```
 
 2). Initialize AwesomeConfig. This setups the configuration scope (see "Scope" later) and prepares configuration for additions.
 
 ```
-const config = require("AwesomeConfig");
+const config = require("awesome-config");
 config().init();
 ```
 
@@ -64,7 +64,7 @@ config().init();
 3). Add zero or more configurations:
 
 ```
-const config = require("AwesomeConfig");
+const config = require("awesome-config");
 config().init();
 config().add(someconfig);
 ```
@@ -74,7 +74,7 @@ There are a variety of ways to add configurations, so make sure to read the [Add
 4). Start AwesomeConfig:
 
 ```
-const config = require("AwesomeConfig");
+const config = require("awesome-config");
 config().init();
 config().add(someconfig);
 config().start();
@@ -95,7 +95,7 @@ If the property doesnt exist or any of its ancestors ("one" for example) does no
 Regardless of where you require AwesomeConfig, it exposes the same configuration details. This lets you initialize and start config once in your application, but access it from anywhere without the need to pass the config object around.
 
 ```
-const config = require("AwesomeConfig");
+const config = require("awesome-config");
 console.log(config.this.is.cool);
 ```
 
@@ -383,7 +383,7 @@ Any time you call `config().init()` you create a new scope.  Then any module you
 const somemodule = require("./SomeModule.js");
 const another = require("./AnotherFile.js");
 
-const config = require("AwesomeConfig");
+const config = require("awesome-config");
 config().init();
 config.add({
 	one: "main"
@@ -393,12 +393,12 @@ config.start();
 console.log("MyMain.js",config.one); // outputs "main"
 
 //AnotherFile.js
-const config = require("AwesomeConfig");
+const config = require("awesome-config");
 
 console.log("AnotherFile.js",config.one); // outputs "main"
 
 //SomeModule.js
-const config = require("AwesomeConfig");
+const config = require("awesome-config");
 config().init();
 config.add({
 	one: "module"
