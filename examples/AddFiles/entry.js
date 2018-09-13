@@ -3,7 +3,7 @@
 "use strict";
 
 // require AwesomeConfig
-const config = require("awesome-config");
+const config = require("@awesomeeng/awesome-config");
 
 // Initialize it to create our scope
 config().init();

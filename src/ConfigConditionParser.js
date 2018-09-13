@@ -2,7 +2,7 @@
 
 "use strict";
 
-const AwesomeUtils = require("AwesomeUtils");
+const AwesomeUtils = require("@awesomeeng/awesome-utils");
 
 const AbstractCondition = require("./conditions/AbstractCondition");
 

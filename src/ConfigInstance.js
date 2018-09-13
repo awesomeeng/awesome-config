@@ -5,8 +5,8 @@
 const FS = require("fs");
 const Path = require("path");
 
-const AwesomeUtils = require("AwesomeUtils");
-const Log = require("awesome-log");
+const AwesomeUtils = require("@awesomeeng/awesome-utils");
+const Log = require("@awesomeeng/awesome-log");
 
 const ConfigSource = require("./ConfigSource");
 const ConfigParser = require("./ConfigParser");
