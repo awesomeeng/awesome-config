@@ -108,6 +108,12 @@ class ConfigInstance {
 			root = AwesomeUtils.Object.extend(root,source.content);
 		});
 
+		// prevent our nested children from being mutated.
+		// We handle this for the nested child itself in the AwesomeConfig proxy.
+		Object.keys(root).forEach((key)=>{
+			AwesomeUtils.Object.deepFreeze(root[key]);
+		});
+
 		// run the resulting object through our resolver.
 		if (this.resolver) this.resolver.resolve(root);
 

@@ -136,20 +136,26 @@ class AwesomeConfig {
 			return apply();
 		};
 
-		const get = function get(target,prop) {
-			let instance = getInstance();
-			if (!instance) return undefined;
-			if (!instance.started) return undefined;
-
-			return instance.config[prop];
-		};
-
 		const has = function has(target,prop) {
 			let instance = getInstance();
 			if (!instance) return false;
 			if (!instance.started) return false;
 
 			return instance.config[prop]!==undefined;
+		};
+
+		const get = function get(target,prop) {
+			let instance = getInstance();
+			if (!instance) return undefined;
+			if (!instance.started) return undefined;
+			if (!instance.config) return undefined;
+			if (!instance.config[prop]) throw new Error("Missing configuration property '"+prop+"'.");
+			
+			return instance.config[prop];
+		};
+
+		const set = function set() {
+			return false;
 		};
 
 		const getOwnPropertyDescriptor = function getOwnPropertyDescriptor(target,prop) {
@@ -208,8 +214,9 @@ class AwesomeConfig {
 		};
 
 		return new Proxy(apply,{
-			get,
 			has,
+			get,
+			set,
 			getOwnPropertyDescriptor,
 			ownKeys,
 			apply: apply

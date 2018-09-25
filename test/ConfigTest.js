@@ -48,7 +48,6 @@ describe("Config",function(){
 		assert.strictEqual(config().sources.length,0);
 	});
 
-
 	it("add object",function(){
 		config().add({
 			one: 1,
@@ -67,7 +66,9 @@ describe("Config",function(){
 		assert.strictEqual(config.one,1);
 		assert.strictEqual(config.two,2);
 		assert.strictEqual(config.three.four,34);
-		assert(!config.seven);
+		assert.throws(()=>{
+			config.seven;
+		});
 	});
 
 	it("add string",function(){
@@ -126,6 +127,34 @@ describe("Config",function(){
 		assert.strictEqual(config.two,2);
 		assert.strictEqual(config.three.four,34);
 	});
+
+	it("immutability",function(){
+		config().add({
+			one: {
+				two: {
+					three: 123
+				}
+			}
+		});
+		config().start();
+		assert.strictEqual(config.one.two.three,123);
+
+		assert.throws(()=>{
+			config.one.two.three = 456;
+		});
+		assert.strictEqual(config.one.two.three,123);
+
+		assert.throws(()=>{
+			config.one.two = 45;
+		});
+		assert.strictEqual(config.one.two.three,123);
+
+		assert.throws(()=>{
+			config.one = 4;
+		});
+		assert.strictEqual(config.one.two.three,123);
+	});
+
 
 
 });
