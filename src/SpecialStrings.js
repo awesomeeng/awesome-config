@@ -8,7 +8,7 @@ const UNRESOLVED = new Error("Unresolved Special String.");
 
 const hostname = OS.hostname();
 const domain = hostname.split(".").slice(-2).join(".");
-const servername = hostname.split(".").slice(0,1);
+const servername = hostname.split(".").slice(0,1)[0];
 
 class SpecialStrings {
 	get UNRESOLVED() {
@@ -55,6 +55,7 @@ class SpecialStrings {
 	resolveOs(flavor) {
 		let lc = flavor.toLowerCase();
 		if (lc==="arch") return OS.arch();
+		if (lc==="type") return OS.type();
 		if (lc==="platform") return OS.platform();
 		if (lc==="cpus") return OS.cpus().length;
 		if (lc==="homedir") return OS.homedir();

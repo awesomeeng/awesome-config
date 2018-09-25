@@ -3,7 +3,16 @@
 "use strict";
 
 const AwesomeUtils = require("@awesomeeng/awesome-utils");
+
 const Log = require("@awesomeeng/awesome-log");
+Log.init({
+	writers: [{
+		type: "null",
+		name: "null"
+	}],
+	disableLoggingNotices: true
+});
+Log.start();
 
 const ConfigInstance = require("./ConfigInstance");
 
@@ -65,50 +74,55 @@ class AwesomeConfig {
 	constructor() {
 		let instances = {};
 
-		Log.info && Log.info("AwesomeConfig","Installed.");
+		Log.info("Installed.");
 
-		const getId = function getId() {
-			let current = global.module || process.mainModule || null;
-			while (current) {
-				let id = current.id || "";
-				if (id===".") break;
-				if (instances[id]) return id;
-				current = current.parent;
+		/**
+		 * @private
+		 */
+		const getInstance = function getInstance() {
+			let stack = AwesomeUtils.Module.stack(2);
+
+			let instance = null;
+
+			while (true) {
+				let entry = stack.shift();
+				if (!entry) break;
+
+				let id = entry.source;
+				instance = instances[id];
+				if (instance) break;
+
+				instance = null;
 			}
-			return AwesomeUtils.Module.source(2,true);
-		};
 
-		const getInstance = function getInstance(id) {
-			if (!id) throw new Error("Missing id.");
-			if (!instances[id]) return null;
-			return instances[id];
+			if (instance) return instance;
+
+			return null;
 		};
 
 		const init = function init() {
-			let id = getId();
+			let id = AwesomeUtils.Module.source(3);
+
 			if (!instances[id]) instances[id] = new ConfigInstance(id);
 			return apply();
 		};
 
 		const start = function start() {
-			let id = getId();
-			let instance = getInstance(id);
+			let instance = getInstance();
 			if (!instance) throw new Error("init() must be called before start().");
 			if (!instance.started) instance.start();
 			return apply();
 		};
 
 		const stop = function stop() {
-			let id = getId();
-			let instance = getInstance(id);
+			let instance = getInstance();
 			if (!instance) throw new Error("init() must be called before stop().");
 			if (instance.started) instance.stop();
 			return apply();
 		};
 
 		const add = function add(content,defaultConditions="",encoding="utf-8") {
-			let id = getId();
-			let instance = getInstance(id);
+			let instance = getInstance();
 			if (!instance) throw new Error("init() must be called before add().");
 			if (instance.started) throw new Error("add() must be called before start().");
 			instance.add(content,defaultConditions,encoding);
@@ -116,16 +130,14 @@ class AwesomeConfig {
 		};
 
 		const reset = function reset() {
-			let id = getId();
-			let instance = getInstance(id);
+			let instance = getInstance();
 			if (!instance) throw new Error("init() must be called before reset().");
 			instance.reset();
 			return apply();
 		};
 
 		const get = function get(target,prop) {
-			let id = getId();
-			let instance = getInstance(id);
+			let instance = getInstance();
 			if (!instance) return undefined;
 			if (!instance.started) return undefined;
 
@@ -133,8 +145,7 @@ class AwesomeConfig {
 		};
 
 		const has = function has(target,prop) {
-			let id = getId();
-			let instance = getInstance(id);
+			let instance = getInstance();
 			if (!instance) return false;
 			if (!instance.started) return false;
 
@@ -145,8 +156,7 @@ class AwesomeConfig {
 			// this resolve an error with ownKeys requiring a 'prototype' member.
 			if (prop==="prototype") return {value: null, writable: false, enumerable: false, configurable: false};
 
-			let id = getId();
-			let instance = getInstance(id);
+			let instance = getInstance();
 			if (!instance) return undefined;
 			if (!instance.started) return undefined;
 
@@ -156,8 +166,7 @@ class AwesomeConfig {
 		const ownKeys = function ownKeys() {
 			// we need to include ["prototype"] or we get wierd proxy errors.
 			//
-			let id = getId();
-			let instance = getInstance(id);
+			let instance = getInstance();
 			if (!instance) return ["prototype"];
 			if (!instance.started) return ["prototype"];
 
@@ -165,8 +174,7 @@ class AwesomeConfig {
 		};
 
 		const toString = function toString() {
-			let id = getId();
-			let instance = getInstance(id);
+			let instance = getInstance();
 			if (!instance) return undefined;
 			if (!instance.started) return undefined;
 
@@ -178,8 +186,7 @@ class AwesomeConfig {
 		};
 
 		const apply = function config() {
-			let id = getId();
-			let instance = getInstance(id);
+			let instance = getInstance();
 			let initialized = !!instance;
 			let started = instance && instance.started || false;
 			let sources = instance && instance.sources || [];

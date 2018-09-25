@@ -33,7 +33,7 @@ class ConfigInstance {
 		this[$PARSER] = new ConfigParser();
 		this[$RESOLVER] = new ConfigResolver();
 
-		Log.debug && Log.debug("AwesomeConfigInstance","Instance "+id+" initialized.");
+		Log.debug("Instance "+id+" initialized.");
 	}
 
 	/**
@@ -114,7 +114,7 @@ class ConfigInstance {
 		// make our configuration.
 		this[$CONFIG] = root;
 
-		Log.debug && Log.debug("AwesomeConfigInstance","Instance "+this.id+" initialized.");
+		Log.debug("Instance "+this.id+" initialized.");
 	}
 
 	/**
@@ -127,7 +127,7 @@ class ConfigInstance {
 		if (!this.started) return;
 
 		this[$CONFIG] = null;
-		Log.debug && Log.debug("AwesomeConfigInstance","Instance "+this.id+" stopped.");
+		Log.debug("Instance "+this.id+" stopped.");
 	}
 
 	/**
@@ -220,7 +220,7 @@ class ConfigInstance {
 
 		this[$SOURCES] = this[$SOURCES].concat(sources);
 
-		Log.debug && Log.debug("AwesomeConfigInstance","Instance "+this.id+" added configuration from origin "+origin+".");
+		Log.debug("Instance "+this.id+" added configuration from origin "+origin+".");
 	}
 }
 
