@@ -1,19 +1,19 @@
 # AwesomeConfig
 
-AwesomeConfig is a powerful configuration system for building enterpreise ready node.js application. It provides scoped, transparent configuration objects to your application based on configuration files or object that you define.  Additionally it provides support for configuration conditions which allow your application to get different configuration based on external things like hostname, os, and more. Finally, AwesomeConfig allows for variables to be used within the config to reference one part of your configuration from another.
+AwesomeConfig is a powerful configuration system for building enterpreise ready node.js application. It provides scoped, transparent configuration objects to your application based on configuration files or objects that you define.  It includes support for conditional configuration sections based on external things like environment variables, hostname, or OS; variables to reference one part of your configuration from another; and lots more.
 
 ## Features
 
 AwesomeConfig provides...
- - Add configuration from files, directories, as JSON, or as a plain javascript object;
- - Uses JSON notation or a custom notation that supports mixing JSON style config and key/value style config;
+ - Add configuration from files, directories, as JSON, or as a plain javascript objects;
+ - Uses JSON notation or our custom notation that supports mixing JSON style config and key/value style config;
  - Configuration is immutable once started;
- - Configuration is exposed as a plain JavaScript object (sort of) for easy usage;
- - Configuration is a singleton (sort of) so no passing your config object around manually;
- - Configuration is scoped to allow for multiple libraries to have separate configuration;
- - Configuration Variables allow cross referencing other parts of config;
- - Configuration Conditions allow you to toggle on/off different parts of config based on external items like hostname, OS, or environment variables.
- - Configuration Plcaeholders to force users to provide key values.
+ - Configuration is exposed as a plain JavaScript object for easy usage;
+ - Configuration is a singleton so no passing your config object around manually;
+ - Configuration is scoped to allow for multiple libraries to have separate configurations;
+ - Configuration Variables allow cross referencing other parts of your configuration;
+ - Configuration Conditions allow you to toggle on/off different parts of your configuration based on external items like hostname, OS, or environment variables.
+ - Configuration Plcaeholders to force users to provide key configuration values.
  - No reserved words at all!
 
 ## Contents
@@ -40,7 +40,7 @@ npm install --save @awesomeeng/awesome-config
 
 ## Setup
 
-To use AwesomeConifg you need to go through four steps to set it up and add configuration into it. THese four steps should be done at the top module of your project, or as close to the top as possible.  Once AwesomeConfig is started, all subsquent requires of config (aka `const config = require("AwesomeConfig")`) will return the fully started configuration. This allows you to setup your config at the top of your application and then just use it in subsequent parts of your application without needing to pass it around manually.
+To use AwesomeConifg you need to go through four steps to set it up and add configuration into it. These four steps should be done at the top module of your project, or as close to the top as possible.  Once AwesomeConfig is started, all subsquent requires of config (aka `const config = require("@awesomeeng/awesome-config")`) will return the fully started configuration. This allows you to setup your config at the top of your application and then just use it in subsequent parts of your application without needing to pass it around manually.
 
 ### Initial Setup
 
@@ -52,7 +52,7 @@ You initially Setup configuration with 4 easy steps...
 const config = require("@awesomeeng/awesome-config");
 ```
 
-2). Initialize AwesomeConfig. This setups the configuration scope (see "Scope" later) and prepares configuration for additions.
+2). Initialize AwesomeConfig. This setups the configuration scope (see [Scope](#scope) later) and prepares configuration for additions.
 
 ```
 const config = require("@awesomeeng/awesome-config");
@@ -99,20 +99,18 @@ const config = require("@awesomeeng/awesome-config");
 console.log(config.this.is.cool);
 ```
 
-There is a little more nuance to it, but that is basically it to using it.
+There is a little more nuance to it, but that is basically all there is to using AwesomeConfig.
 
 ## Adding Configurations
 
 You can add configuration in four basic ways: A JavaScript Object, a JSON String, a resolved filename, or a resolved directory. Each approach has
-slight differences to what happens.
+slight differences to what happens. You may also add as many configurations you want before calling `config().start()`.
 
-You may also add as many configurations you want before calling `config().start()`.
-
-When `config().start()` is called, all of the added configurations are merged together into a single configuration view.  The order they are merged is the order in which they are added, thus things added later will overwrite things added earlier if they have the same property names.
+When `config().start()` is called, all of the added configurations are merged together into a single configuration view.  The order they are merged is the order in which they are added, thus things added later will overwrite things added earlier if they have the same property names. This intentionally lets you provide some values, but then override them later as needed.
 
 ### Adding A JavaScrpt Object Configuration
 
-You may add a JavaScript object as a configuration.  The object must be a plain JavaScript object and cannot be an Array or other primataive.
+You may add a JavaScript object as a configuration.  The object must be a plain JavaScript object and cannot be an Array or other primative.
 
 ```
 config().add({
@@ -130,8 +128,8 @@ config().add({
 This would result in the following properties:
 
 ```
-config.one.two.three
-config.four.five
+config.one.two.three === 123
+config.four.five === 45
 ```
 
 ### Adding A JSON String Configuration
@@ -142,11 +140,17 @@ You can add a JSON String. AwesomeConfig will parse the JSON using `JSON.parse()
 config().add("{\"one\":1}");
 ```
 
+This would result in the following properties:
+
+```
+config.one === 1
+```
+
 ### Adding A Filename Configuration
 
 You may pass a filename into `config().add()` and the file contents will be loaded, parsed using the AwesomeConfig Notation parser (see [Configuration Notation](#configuration-notation) below), and the resulting objects and conditions are added.
 
-The passed filename is resolved relative to the current working directory, or the calling module if not found in the current working directory.
+The passed filename is resolved relative to the current working directory, or the calling module if not found in the current working directory. If the file is not found or otherwise unreadable, an exception will be thrown.
 
 ```
 config().add("./MyConfig.cfg");
@@ -168,7 +172,7 @@ See [Conditions](#conditions) below for more information on condition strings.
 
 ## Configuration Notation
 
-AwesomeConfig configuration files use a custom configuration notation that is a hybrid of both JSON and key/value pairs.  If you want to just use pure JSON that is fine as well. However, AwesomeConfig notation gives you a little bit more such as comments, conditions, key/values, and mixing key/values with json.
+AwesomeConfig configuration files use a custom configuration notation that is a hybrid of both JSON and key/value pairs.  If you want to just use pure JSON that is fine as well. However, AwesomeConfig notation gives you a little bit more such as comments, conditions, key/values, variables, placeholders, and mixing key/values with json.
 
 ### Example
 
@@ -200,7 +204,7 @@ eight.0.nine = 89
 
 In the example you will notice a few things going on:
 
-First we have a standard key/value pair in "one.two.three". The dot notation is used to separate the path into levels.  If we wanted to write the same using JSON it would look like this:
+First we have a standard key/value pair in "one.two.three". The dot notation is used to separate the path into levels.  The key/value pair notation form shave a lot of space and creates cleaner configurations. If we wanted to write the same using JSON it would look like this:
 
 ```
 {
@@ -244,7 +248,14 @@ AwesomeConfig files support three different types of comments:
 	# this is a hash comment
 	blah=123 # and so is this
 	```
- - Multi-Line Comments start with a "/*" and run until a corresponding "*/" string is detected.  Multi-Line comments  can span multiple lines and are great for large blocks of comment text.
+ - Multi-Line Comments start with a "/*" and run until a corresponding "*/" string is detected.  Multi-Line comments can span multiple lines and are great for large blocks of comment text.
+ 	```
+ 	/*
+ 		This is a
+		multiline
+		comment.
+ 	 */
+ 	```
 
 ### JSON Block
 
@@ -272,7 +283,7 @@ three.four = {
 
 #### Keys
 
-A key consist of one or more letter ("Abc"), digit ("123"), underscore ("_"), dash ("-"), or dollar sign ("$") character. No other character is a valid key and it would be best to avoid them.
+A key consist of one or more letter ("Abc"), digit ("123"), underscore ("_"), dash ("-"), or dollar sign ("$") characters. No other character is a valid key and it would be best to avoid them.
 
 You can use the dot character to separate keys into multiple level keys, or a key path. `one.two.three` is a key path with three levels of nesting where "three" is a child of "two" which in turn is a child of "one".
 
@@ -315,7 +326,7 @@ A value may be a null, a boolean, a number, a string, a quoted string, an array,
 	one.two: onetwo,
 	one.two: 'onetwo'
 	```
- - **Array**: An Array starts with a open bracket ("[") and ends with a close bracket ("]") and contains zero or more values. The values themselves do not need to be of the same type. They roughly adhere to the same types for the values in this section with one exception: strings MUST be quoted. Each value is separated by a comma.
+ - **Array**: An Array starts with a open bracket ("[") and ends with a close bracket ("]") and contains zero or more values. The values themselves do not need to be of the same type. They roughly adhere to the same types for the values in this section with one exception: strings MUST be quoted. Each value is separated by a comma. Arrays may span multiple lines.
 	```
 	one.two: []
 	one.two: ["asdf"]
@@ -323,7 +334,7 @@ A value may be a null, a boolean, a number, a string, a quoted string, an array,
 		four: 124
 	}]
 	```
- - **Object**: Objects here are the same as JSON blocks described above.  THey begin with a open brace ("{") and end with a close brace ("}") character.  Keys do not need to be quoted, but they can be.
+ - **Object**: Objects here are the same as JSON blocks described above.  They begin with a open brace ("{") and end with a close brace ("}") character.  Keys do not need to be quoted, but they can be.
 	```
 	one.two: {
 		three: 123
@@ -339,7 +350,7 @@ A value may be a null, a boolean, a number, a string, a quoted string, an array,
 condition = "[" [condition] "]"
 ```
 
-Conditions describe certain criteria that must be met in order for the configuration it applies to to be included when merged (during `config().start()`).  Conditions within the Configuration Notation start with an open brakcet ("[") character and terminate in a close bracket ("]") character. Condition may never be nested in another  object like a key/value pair or a JSON block.
+Conditions describe certain criteria that must be met in order for the configuration that follows to be included when merged (during `config().start()`).  Conditions within the Configuration Notation start with an open brakcet ("[") character and terminate in a close bracket ("]") character. Condition may never be nested in another object like a key/value pair or a JSON block; they may only be used at the top level.
 
 Here's an example:
 
@@ -347,22 +358,22 @@ Here's an example:
 // Example of conditions
 one.two: "unknown"
 
-[os=windows]
+[os:type=windows]
 one.two: "windows"
 
-[os=linux]
+[os:type=linux]
 one.two: "unix"
 
-[os=darwin] // mac
+[os:type=darwin] // mac
 one.two: "mac"
 
 []
 one.three: 13
 ```
 
-In AwesomeConfig's Configuration Notation, a condition impacts all of the coniguration that follows it, until a different condition is applied. In the above example, if the OS is "windows" the value of `one.two` after merging will be unknown.
+In AwesomeConfig's Configuration Notation, a condition impacts all of the coniguration that follows it, until a different condition is applied. In the above example, if the OS is "windows" the value of `one.two` after merging will be "windows".
 
-An empty condition signals that **no condition* applies, thus returning the configuration to the default conditions state.
+An empty condition `[]` signals that **no condition* applies, thus returning the configuration to the default conditions state.
 
 For more information on condition check out the [Conditions](#conditions) section below.
 
@@ -374,21 +385,21 @@ THe configuration format supports both Variables and Placeholders. See the docum
 
 ## Scope
 
-In AwesomeConfig, scope defines the space to which a configuation applies.  Because AwesomeConfig is exposed as a singleton and availabe to anything that requires AwesomeConfig (`require("AwesomeConfig")`) scope helps to control that.
+In AwesomeConfig, scope defines the space to which a configuation applies.  Because AwesomeConfig is exposed as a singleton and availabe to anything that requires AwesomeConfig (`require("@awesomeeng/awesome-config")`) scope helps to control that.
 
-Any time you call `config().init()` you create a new scope.  Then any module you rely on that requires AwesomeConfig will use that scope, unless it has a scope of its own.  Consider the following:
+Any time you call `config().init()` you create a new scope.  Then any module you rely on that requires AwesomeConfig will use that scope unless it has a scope of its own.  Consider the following:
 
 ```
 // MyMain.js
-const somemodule = require("./SomeModule.js");
-const another = require("./AnotherFile.js");
-
 const config = require("@awesomeeng/awesome-config");
 config().init();
 config.add({
 	one: "main"
 });
 config.start();
+
+const somemodule = require("./SomeModule.js");
+const another = require("./AnotherFile.js");
 
 console.log("MyMain.js",config.one); // outputs "main"
 
@@ -412,13 +423,13 @@ SomeModule has a different scope then AnotherFile and MyMain because it called `
 
 This allows modules to implement their own AwesomeConfig setup inside of their modules without worrying about their configuration leaking into other modules or users.
 
-Scope works by comparing the module and its ancestor modules against the list of modules that called `config().init()`. If the module or one of its ancestors is in that list, that is its scope.
+Scope works by comparing the execution stack against the list of modules that called `config().init()`. If the module or one of its ancestors is in that list, that is its scope.
 
 ## Variables
 
 Variables allow you to reference one point in configuration from a different part of configuration.  Coupled with [Conditions](#conditions) Variables can be really powerful.
 
-A variable has the form `${path}` where path is some configuration propert dot noatino path, you might use i you were getting the value itself.
+A variable has the form `${path}` where path is some configuration property dot notation path, you might use if you were getting the value itself.
 
 ```
 one.two: 12
@@ -427,13 +438,13 @@ one.four: ${one.three}
 one.five: "${one.four} and FIVE!"
 ```
 
-When you call `config().start()` AwesomeConif gmerges all the configuration together.  Then it iterates the entire configuration looking for any Variables, and replaces those variables with their appropriate values.  You can even have variables that reference variables and so on, as shown in the example above.
+When you call `config().start()` AwesomeConfig merges all the added configurations together to form a single configuration view.  Then it iterates the entire configuration looking for any Variables and replaces those variables with their appropriate values.  You can even have variables that reference variables and so on, as shown in the example above.
 
-If for some reason a variable cannot resolve you will get an exception immediately.
+If for some reason a variable cannot resolve, you will get an exception immediately.
 
 You can use a variable anywhere you would have a value.  In key/value pairs you can simple have the variable in place of the string; in JSON blocks you should wrap the variable in quotes like `"${blah}"` so the JSON will validate.
 
-Variables get replaced by the exact content they are referencing.  If the variable is the entire content of the string, it will replace the string with the number 12 as for `one.three` and `one.four` from the example above.  However, if the variable is only a portion of the content, it will **string concatenate** the contents together, as shown in the example above for `one.five` which would return `12 and FIVE!` as a string.
+Variables get replaced by the exact content they are referencing.  If the variable is the entire content of the string, it will replace the string with the type of the resolved variable as for `one.three` and `one.four` from the example above.  However, if the variable is only a portion of the content, it will **string concatenate** the contents together, as shown in the example above for `one.five` which would return `12 and FIVE!` as a string.
 
 ### Special Variables
 
@@ -457,6 +468,7 @@ In addition to referencing specific portions of config using variables, you can 
  - **${process:version}**: Returns node.js version, as a string.
 
  - **${os:arch}**: Returns the OS arch string, currently one of the following: arm | arm64 | ia32 | mips | mipsel | ppc | ppc64 | s390 | s390x | x32 | x64
+ - **${os:type}**: Returns the OS uname type string; for example "Linux", or "Windows_NT", or "Darwin"
  - **${os:bits}**: Returns the number of bits in the system (32 or 64)
  - **${os:cpus}**: Returns the number of CPUs reported to node.js
  - **${os:home}**: Returns the home directory path.
@@ -470,7 +482,7 @@ In addition to referencing specific portions of config using variables, you can 
 
 ## Placeholders
 
-Placeholders are a lot like variables but they are used to mark portions of your configuration that must be completed before the configuration is valid.  Placeholders are a great way of saying that some value in your configuration must be completed in order to be valid.  Here's an example:
+Placeholders are a lot like variables but they are used to mark portions of your configuration that must be completed before the configuration is valid.  Placeholders are a great way of saying that some value in your configuration must be overwritten by a later configuration in order to be valid.  Here's an example:
 
 ```
 one.two: <<one.two is missing>>
@@ -503,9 +515,9 @@ A conditions support boolean operators like `not` and `and` and `or` as well as 
 
 ## Documentation
 
- - [Understanding Merging](./docs/OptionsAndSwitches.md)
- - [Variables and Placeholder](./docs/Commands.md)
- - [Condition Expressions](./docs/Help.md)
+ - [Understanding Merging](./docs/Merging.md)
+ - [Variables and Placeholder](./docs/VariablesAndPlaceholders.md)
+ - [Condition Expressions](./docs/Conditions.md)
 
  - [API Documentation](./docs/API.md)
 
@@ -531,4 +543,4 @@ To learn more about The Awesome Engineering Company and our suite of products, v
 
 ## License
 
-AwesomeConfig is released under the MIT License. Please read the  [LICENSE](https://raw.githubusercontent.com/awesomeeng/AwesomeConfig/master/LICENSE?token=ABA2_wogpYds4a1qC_4aeUZd8C1in6Qcks5bUiQFwA%3D%3D) file for details.
+AwesomeConfig is released under the MIT License. Please read the  [LICENSE](./LICENSE) file for details.
