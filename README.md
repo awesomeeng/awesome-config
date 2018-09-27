@@ -10,7 +10,7 @@ AwesomeConfig provides...
  - Configuration is immutable once started;
  - Configuration is exposed as a plain JavaScript object for easy usage;
  - Globally accessable config without the need to pass config objects around;
- - Support for nested/isolated usage as needed;
+ - Support for namespaced instances to isolated usage as needed;
  - Configuration Variables allow cross referencing other parts of your configuration;
  - Configuration Conditions allow you to toggle on/off different parts of your configuration based on external items like hostname, OS, or environment variables.
  - Configuration Plcaeholders to force users to provide key configuration values.
@@ -21,7 +21,7 @@ AwesomeConfig provides...
  - [Setup](#setup)
  - [Adding Configurations](#adding-configuration)
  - [Configuration Notation](#configuration-notation)
- - [Nested Usage](#nested-usage)
+ - [Namespaces](#namespaces)
  - [Variables](#variables)
  - [Placeholders](#placeholders)
  - [Conditions](#conditions)
@@ -383,28 +383,40 @@ Note that conditions are only valid in AwesomeConfig Configuration Notation or i
 
 The configuration format supports both Variables and Placeholders. See the documentation for [Variables](#variables) and [Placeholders](#placeholders) below for more details.
 
-## Nested Usage
+## Namespaces
 
-If you are writing an application that uses AwesomeConfig, but also requires a module that uses AwesomeConfig as well, the potential for conflicting views of config to exist.  By and large AwesomeConfig will attempt to resolve this by creating different configuration scope based on where the `Log.init()` method is called.  However, in some cases this could prove problematic.  To address this it is possible to specifically create an instance of AwesomeConfig and use that exclusively.  Any configuratino add to the specific instance is contained only to that instance and not add to the global AwesomeConfig object.
+AwesomeConfig is a global object, meaning that when you use AwesomeConfig in one part of your application, a second usage of it in a different part of your application uses the same object. If you are writing an application that uses AwesomeConfig, but also requires a module that uses AwesomeConfig as well, the potential for conflicting views of config or overwriting keys exists.  To resolve this, AwesomeConfig allows you to use an optional namespace parameter during require. If you are writing a library that you expect others to require and are using AWesomeConfig, consider using a namespace instead of global usage.
 
-If you are writing a library that you expect others to require and are using AWesomeConfig, consider using nested usage instead of global usage.
+When you use a namespace you are creating an entirely separate instance of AwesomeConfig to which you can `init()`, `start()`, and `add()` without fear of conflicting with another namespace or the global namespace.  Furthermore, you can reference your namespace in other parts of your application without having to pass AwesomeConfig around; you just need to know the namespace name.
 
-### Creating a specific instance
+### Using a Namespace
 
-You create a specific instance of config by passing a predetermined key into the `config()` method. This tells config to specifically use that instance. THis changes how your require AwesomeConifg slightly, but really only adds one more line of code.
-
-```
-const AwesomeConfig = require("@awesomeeng/awesome-config");
-const config = AwesomeConfig("your magic key");
-```
-
-The key you use (`your magic key` in the example) can be any string you want so long as it is not an empty string. Any time you want to specifically use your specific instance, you simply provide your key.
-
-Here's an example of setting up AwesomeConfig using a custom instance key.
+When you require AwesomeConfig as shown below you are return the global instance of AwesomeConfig.
 
 ```
 const AwesomeConfig = require("@awesomeeng/awesome-config");
-const config = AwesomeConfig("your magic key");
+```
+
+To switch to a different name space, change your require statement like this:
+
+```
+const AwesomeConfig = require("@awesomeeng/awesome-config");
+const config = AwesomeConfig("your namespace name");
+```
+
+You can shortcut this to one line if you like, thus:
+
+```
+const config = require("@awesomeeng/awesome-config")("your namespace name");
+```
+
+Any time you require with the same namespace name, you get the same instance. This lets you access a specific namespaced instance anywhere you like. Because of this it is recommended that you use fairly unique namespace names. Calling your namespace "config" or "namespace" is probably a poor idea; consider something like "MyAwsesomeModuleNamespace".
+
+Here's an example of setting up AwesomeConfig using a custom namespace.
+
+```
+const AwesomeConfig = require("@awesomeeng/awesome-config");
+const config = AwesomeConfig("MyAwesomeModuleNamespace");
 
 config().init();
 config().add(...);
@@ -415,7 +427,7 @@ And here's an example of using it elsewhere.
 
 ```
 const AwesomeConfig = require("@awesomeeng/awesome-config");
-const config = AwesomeConfig("your magic key");
+const config = AwesomeConfig("MyAwesomeModuleNamespace");
 
 console.log(config.one.two.three);
 ```
@@ -526,7 +538,7 @@ AwesomeConfig ships with a set of examples for your reference.
 
  - [Variables, Placeholders, and Conditions](./examples/VarsPlaceholdersConditions): An example of using AwesomeConfig variables, placeholders and conditions.
 
- - [Nested Usage](./examples/NestedUsage): An example of how to do nested usage.
+ - [Namespaces](./examples/Namespaces): An example of how to use namespaces.
 
 ## The Awesome Engineering Company
 
