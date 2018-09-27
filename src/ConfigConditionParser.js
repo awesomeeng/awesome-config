@@ -21,6 +21,8 @@ const StringCondition = require("./conditions/StringCondition");
 const SpecialStrings = require("./SpecialStrings");
 
 /**
+ * @private
+ * 
  * Parses a condition string and returns a single condition back. The returned
  * condition can contain a set of nested conditions are needed.
  *

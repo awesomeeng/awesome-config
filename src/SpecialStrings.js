@@ -10,6 +10,9 @@ const hostname = OS.hostname();
 const domain = hostname.split(".").slice(-2).join(".");
 const servername = hostname.split(".").slice(0,1)[0];
 
+/**
+ * @private
+ */
 class SpecialStrings {
 	get UNRESOLVED() {
 		return UNRESOLVED;

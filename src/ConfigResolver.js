@@ -7,6 +7,8 @@ const AwesomeUtils = require("@awesomeeng/awesome-utils");
 const $STACK = Symbol("stack");
 
 /**
+ * @private
+ * 
  * Resolves a configuration for all its variables and placeholders.
  */
 class DefaultResolver {

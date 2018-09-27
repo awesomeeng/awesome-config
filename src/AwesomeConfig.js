@@ -2,8 +2,6 @@
 
 "use strict";
 
-const AwesomeUtils = require("@awesomeeng/awesome-utils");
-
 const Log = require("@awesomeeng/awesome-log");
 Log.init({
 	writers: [{
@@ -19,20 +17,22 @@ const ConfigInstance = require("./ConfigInstance");
 const instances = {};
 
 /**
- * The AwesomeConfig class is instantiated and returned whenever you
- * require("AwesomeConfig").
+ * @namespace
+ * @summary The AwesomeConfig Object.
+ *
+ * The AwesomeConfig Object returned whenever you
+ * `require("@awesomeeng/awesome-config")` or
+ * `require("@awesomeeng/awesome-config")("namespace")`.
  *
  * Once required, config can be referenced in one of two ways:
  *
- * 1). To reference config management functions, you first call config
- * as a function: `config().xyz`
+ *  1. To reference config management functions, you first call config
+ *  as a function: `config().xyz`
  *
- * 2). To reference config values, which we will see below, you reference
- * config as an object: `config.xyz`
+ *  2. To reference config values, which we will see below, you reference
+ *  config as an object: `config.xyz`
  *
- * It begins by calling `config().init()`. Each time you call `init()` it creates
- * a new scope, based on the module from which you call it. (If, you
- * call `config().init()` from the same module, the scope remains the same.)
+ * To use AwesomeConfig begin by calling `config().init()`.
  *
  * ```
  * let config = require("@awesomeeng/awesome-config");
@@ -49,17 +49,23 @@ const instances = {};
  *
  * You can add config in a variety of ways:
  *
- * 	**Object** - A plain javascript object can be passed to config.
+ * - **config().add(object)** - You may add a plain JavaScript object as
+ *   configuration and it will be merged with the configuration.
  *
- *  **JSON String** - A JSON string can be passed to config and it will parse
- *  it into a JSON Object and use that as per above. THe string must parse and
- *  it must parse into an object not an array.
+ * - **config().add(string)** - You may add a string as configuration data
+ *   and it will be run through the configuration parser and the
+ *   resulting data will be merged with the configuration.
  *
- *  **Filename** - You can pass a resolved filename in and AwesomeConfig will
- *  read its contents and parse it and use that.
+ * - **config().add(filename)** - You may add a fully resolved filename and
+ *   the content of the file will be read in, run through the
+ *   configuration parser, and the resulting data will be merged
+ *   with the configuration.
  *
- *  **Directory** - Passing a directory will cause AwesomeConfig to load all
- *  *.cfg files in that directory, in alphabetical order, into config.
+ * - **config().add(directory)** - You may add a fully resolved directory and
+ *   the directory will be examined for .config files. If any are
+ *   found, each file will be read ine, run through the configuration
+ *   parser, and the resulting data will be merged with the
+ *   configuration.
  *
  * After all your configuration has been added, you can start config with
  * `config().start()`. Once config has been started, you cannot add any more
@@ -68,11 +74,21 @@ const instances = {};
  *
  * Please see (AwesomeConfig's documentation)[https://github.com/awesomeeng/AwesomeConfig]
  * for more details.
+ *
+ * @borrows AwesomeConfigProxy#initialized as initialized
+ * @borrows AwesomeConfigProxy#started as started
+ * @borrows AwesomeConfigProxy#sources as sources
+ *
+ * @borrows AwesomeConfigProxy#init as init
+ * @borrows AwesomeConfigProxy#start as start
+ * @borrows AwesomeConfigProxy#stop as stop
+ * @borrows AwesomeConfigProxy#add as add
+ * @borrows AwesomeConfigProxy#reset as reset
+ *
  */
 class AwesomeConfig {
 	/**
 	 * @private
-	 *
 	 * @constructor
 	 */
 	constructor() {
@@ -83,9 +99,8 @@ class AwesomeConfig {
 
 /**
  * @private
- *
- * Internally used to hold the instance information for config.
  */
+// Internally used to hold the instance information for config.
 class AwesomeConfigProxy {
 	constructor(instanceName) {
 		let me = this;
@@ -152,14 +167,30 @@ class AwesomeConfigProxy {
 		});
 	}
 
+	/**
+	 * Returns true if `config().init()` has been called.
+	 *
+	 * @return {boolean}
+	 */
 	get initialized() {
 		return !!this.instance;
 	}
 
+	/**
+	 * Returns true if `config().start()` has been called.
+	 *
+	 * @return {boolean}
+	 */
 	get started() {
 		return this.instance && this.instance.started || false;
 	}
 
+	/**
+	 * Returns an Array of String with each string representing the origin of
+	 * each configuration that was added via `config().add(...)`.
+	 *
+	 * @return {Array<string>}
+	 */
 	get sources() {
 		let sources = this.instance && this.instance.sources || [];
 		return sources.map((source)=>{
@@ -167,23 +198,104 @@ class AwesomeConfigProxy {
 		});
 	}
 
+	/**
+	 * Initialize AwesomeConfig for usage. To call this method must be
+	 * done by callign your config object as a method and then chaining
+	 * the `init` function from that, as shown here:
+	 *
+	 * ```
+	 * config().init();
+	 * ```
+	 *
+	 * Calling this method indicates to AwesomeConfig that you are ready
+	 * to start adding configuration via `config().add(...)`, but not
+	 * yet ready to use it.  In order to start using config, call
+	 * `config().start()` to signal that you are ready to start
+	 * accessing configuration.
+	 *
+	 * Subsequent calls to `init` will not have any effect, only the
+	 * first `config().init()`
+	 *
+	 * @return {AwesomeConfig}
+	 */
 	init() {
-		this.instance = new ConfigInstance(this.instanceName);
+		if (!this.instance) this.instance = new ConfigInstance(this.instanceName);
 		return this;
 	}
 
+	/**
+	 * Signal to AwesomeConfig that all configuration has been added via
+	 * `config().add(...)` and you are ready to start accessing configuration.
+	 *
+	 * Start actually performs several function important to understanding config:
+	 *
+	 * First, it takes all added configurations and merges them into a single
+	 * unified view.  This takes into account the order in which configuration
+	 * was added with later adds overwriting earlier adds.
+	 *
+	 * Also, only configurations whose conditions resolve truthy are merged.
+	 *
+	 * Second, after merging, all variables are resolved and any variable that
+	 * does not resolve throws an exception.
+	 *
+	 * Third, after variable resolution, all values are checked for placeholders.
+	 * If any placeholders are found, an exception is thrown.
+	 *
+	 * Once all three of these actions are done and so long as no exceptions
+	 * were thrown, your configuration is now available for usage.
+	 *
+	 * @return {AwesomeConfig}
+	 */
 	start() {
 		if (!this.instance) throw new Error("init() must be called before start().");
 		if (!this.instance.started) this.instance.start();
 		return this;
 	}
 
+	/**
+	 * Takes AwesomeConfig out of started mode an allows for more configurations
+	 * to be added via `config().add(...)`. `config().start()` can then be called
+	 * again to begin using config.
+	 *
+	 * @return {AwesomeConfig}
+	 */
 	stop() {
 		if (!this.instance) throw new Error("init() must be called before stop().");
 		if (this.instance.started) this.instance.stop();
 		return this;
 	}
 
+	/**
+	 * The `config()add()` method has four different usage forms, each unique in thier
+	 * own right:
+	 *
+	 * - **config().add(object)** - You may add a plain JavaScript object as
+	 *   configuration and it will be merged with the configuration.
+	 *
+	 * - **config().add(string)** - You may add a string as configuration data
+	 *   and it will be run through the configuration parser and the
+	 *   resulting data will be merged with the configuration.
+	 *
+	 * - **config().add(filename)** - You may add a fully resolved filename and
+	 *   the content of the file will be read in, run through the
+	 *   configuration parser, and the resulting data will be merged
+	 *   with the configuration.
+	 *
+	 * - **config().add(directory)** - You may add a fully resolved directory and
+	 *   the directory will be examined for .config files. If any are
+	 *   found, each file will be read ine, run through the configuration
+	 *   parser, and the resulting data will be merged with the
+	 *   configuration.
+	 *
+	 * You may pass an optional string of *conditions* to add that will be
+	 * applied to determining if the content is merged or not.  See the
+	 * conditions section for a lot more details about how they work.
+	 *
+	 * @param {(object|string)} content
+	 * @param {string}
+	 *
+	 * @returns {AwesomeConfig}
+	 */
 	add(content,defaultConditions="",encoding="utf-8") {
 		if (!this.instance) throw new Error("init() must be called before add().");
 		if (this.instance.started) throw new Error("add() must be called before start().");
@@ -191,12 +303,22 @@ class AwesomeConfigProxy {
 		return this;
 	}
 
+	/**
+	 * `config().reset()` can be called when AwesomeConfig is initialized but stopped
+	 * to remove all prior configuration. It creates a completely clean slate.
+	 *
+	 * @return {AwesomeConfig}
+	 */
 	reset() {
 		if (!this.instance) throw new Error("init() must be called before reset().");
+		if (!this.started) throw new Error("stop() must be called before reset().");
 		this.instance.reset();
 		return this;
 	}
 
+	/**
+	 * @private
+	 */
 	toString() {
 		if (!this.instance) return undefined;
 		if (!this.instance.started) return undefined;

@@ -7,6 +7,8 @@ const AbstractCondition = require("./AbstractCondition");
 const $EXPRESSION = Symbol("expression");
 
 /**
+ * @private
+ * 
  * A conitino that groups other conditions into a cohesive set.
  *
  * @extends AbstractCondition

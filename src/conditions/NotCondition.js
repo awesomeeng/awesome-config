@@ -7,6 +7,8 @@ const AbstractCondition = require("./AbstractCondition");
 const $CONDITION = Symbol("condition");
 
 /**
+ * @private
+ * 
  * represents a NOT condition that has a left side, which is a
  * conditions in its own right. In order for a NOT condition to be true
  * the left condition must be false.
@@ -29,7 +31,7 @@ class NotCondition extends AbstractCondition {
 	/**
 	 * Returns the inner condition of this NOT condition.
 	 *
-	 * @return {AbstractCondition} 
+	 * @return {AbstractCondition}
 	 */
 	get condition() {
 		return this[$CONDITION];

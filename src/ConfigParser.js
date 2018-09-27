@@ -10,6 +10,8 @@ const $ORIGIN = Symbol("origin");
 const $DEFAULT_CONDITIONS = Symbol("defaultConditions");
 
 /**
+ * @private
+ * 
  * Parser a configuration string using AwesomeConfig's custom config format.
  *
  * Please see (AwesomeConfig's documentation)[https://github.com/awesomeeng/AwesomeConfig]

@@ -8,6 +8,8 @@ const $LEFT = Symbol("left");
 const $RIGHT = Symbol("right");
 
 /**
+ * @private
+ * 
  * represents an OR condition that has a left and right side, each of which are
  * conditions in their own right. In order for an OR condition to be true,
  * either the left or right conditions must resolve to true.
@@ -18,8 +20,8 @@ class OrCondition extends AbstractCondition {
 	/**
 	 * Create a new OR condition.
 	 *
-	 * @param {AbstractCondition} left  
-	 * @param {AbstractCondition} right 
+	 * @param {AbstractCondition} left
+	 * @param {AbstractCondition} right
 	 */
 	constructor(left,right) {
 		super();

@@ -11,6 +11,8 @@ const $CONDITIONS = Symbol("conditions");
 const ConditionParser = new ConfigConditionParser();
 
 /**
+ * @private
+ * 
  * A ConfigSource is an object of configuration, limited by one or
  * more conditions, and identified by an origin.
  * If `config().add()` is called with
@@ -26,7 +28,7 @@ class ConfigSource {
 	 *
 	 * @param {string} origin
 	 * @param {Object} content
-	 * @param {string} [conditions=""] 
+	 * @param {string} [conditions=""]
 	 */
 	constructor(origin,content,conditions="") {
 		if (!origin) throw new Error("Missing origin.");

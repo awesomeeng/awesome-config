@@ -7,10 +7,14 @@ const AbstractCondition = require("./AbstractCondition");
 const $SOURCE = Symbol("source");
 const $FIELD = Symbol("field");
 
+/**
+ * @private
+ * @extends AbstractCondition
+ */
 class StringCondition extends AbstractCondition {
 	constructor(source,field) {
 		super();
-		
+
 		this[$SOURCE] = source;
 		this[$FIELD] = field;
 	}

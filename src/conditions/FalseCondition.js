@@ -4,6 +4,10 @@
 
 const AbstractCondition = require("./AbstractCondition");
 
+/**
+ * @private
+ * @extends AbstractCondition
+ */
 class TrueCondition extends AbstractCondition {
 	constructor(field) {
 		super();

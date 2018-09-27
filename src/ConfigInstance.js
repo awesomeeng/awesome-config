@@ -19,6 +19,8 @@ const $PARSER = Symbol("parser");
 const $RESOLVER = Symbol("resolver");
 
 /**
+ * @private
+ *
  * Creates a scope for config. Config scopes are bound to the module which
  * loads it and all descendant calls. So if you create module XYZ and do
  * `config().init()` inside of it, all calls that derive from XYZ will use
@@ -39,7 +41,7 @@ class ConfigInstance {
 	/**
 	 * Id of this instance/scope.
 	 *
-	 * @return {[type]} [description]
+	 * @return {string}
 	 */
 	get id() {
 		return this[$ID];
@@ -49,7 +51,7 @@ class ConfigInstance {
 	 * Returns true of this instance/scope has been started and nothing
 	 * else can be added to it.
 	 *
-	 * @return {[type]} [description]
+	 * @return {boolean}
 	 */
 	get started() {
 		return this[$CONFIG]!==null;
@@ -58,7 +60,7 @@ class ConfigInstance {
 	/**
 	 * Return the origin of all added config data.
 	 *
-	 * @return {[type]} [description]
+	 * @return {Array<String>}
 	 */
 	get sources() {
 		return this[$SOURCES];
@@ -67,7 +69,7 @@ class ConfigInstance {
 	/**
 	 * Return the underlying config object.
 	 *
-	 * @return {[type]} [description]
+	 * @return {Object}
 	 */
 	get config() {
 		return this.started && this[$CONFIG] || null;
@@ -76,7 +78,7 @@ class ConfigInstance {
 	/**
 	 * Returns the parse being used by this config instance.
 	 *
-	 * @return {[type]} [description]
+	 * @return {ConfigParser}
 	 */
 	get parser() {
 		return this[$PARSER];
@@ -85,7 +87,7 @@ class ConfigInstance {
 	/**
 	 * Returns the resolver being used by this config instance.
 	 *
-	 * @return {[type]} [description]
+	 * @return {ConfigResolver}
 	 */
 	get resolver() {
 		return this[$RESOLVER];
@@ -95,7 +97,7 @@ class ConfigInstance {
 	 * Starts this config instance as running which means no more
 	 * config details can be added to it.
 	 *
-	 * @return {[type]} [description]
+	 * @return {void}
 	 */
 	start() {
 		if (this.started) return;
@@ -127,7 +129,7 @@ class ConfigInstance {
 	 * Stops this config instance running. Note that one stopped new
 	 * items can be added.
 	 *
-	 * @return {[type]} [description]
+	 * @return {void}
 	 */
 	stop() {
 		if (!this.started) return;
@@ -178,7 +180,7 @@ class ConfigInstance {
 	 * applied to determining if the content is merged or not.  See the
 	 * conditions section for a lot more details about how they work.
 	 *
-	 * @param {(object|string)} content         [description]
+	 * @param {(object|string)} content
 	 * @param {string}
 	 */
 	add(content,defaultConditions="",encoding="utf-8") {
@@ -231,6 +233,8 @@ class ConfigInstance {
 }
 
 /**
+ * @private
+ * 
  * Given some filename, resolve that filename relative to your current working directory, or
  * if that fails, against the directory of the calling module.
  *
@@ -271,6 +275,5 @@ const resolve = function resolve(filename) {
 	// fail
 	return null;
 };
-
 
 module.exports = ConfigInstance;

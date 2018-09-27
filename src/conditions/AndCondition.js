@@ -8,6 +8,8 @@ const $LEFT = Symbol("left");
 const $RIGHT = Symbol("right");
 
 /**
+ * @private
+ * 
  * represents an AND condition that has a left and right side, each of which are
  * conditions in their own right. In order for an AND condition to be true
  * both the left and right conditions must also be true.

@@ -8,6 +8,7 @@ const $OPERATOR = Symbol("operator");
 const $VALUE = Symbol("value");
 
 /**
+ * @private
  * Defines the shape of each condition.  A condition must implement
  * the `isValidOperator(op)` and `toString()` and `resolve()` methods.
  */
