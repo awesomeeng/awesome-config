@@ -9,8 +9,8 @@ AwesomeConfig provides...
  - Uses JSON notation or our custom notation that supports mixing JSON style config and key/value style config;
  - Configuration is immutable once started;
  - Configuration is exposed as a plain JavaScript object for easy usage;
- - Configuration is a singleton so no passing your config object around manually;
- - Configuration is scoped to allow for multiple libraries to have separate configurations;
+ - Globally accessable config without the need to pass config objects around;
+ - Support for nested/isolated usage as needed;
  - Configuration Variables allow cross referencing other parts of your configuration;
  - Configuration Conditions allow you to toggle on/off different parts of your configuration based on external items like hostname, OS, or environment variables.
  - Configuration Plcaeholders to force users to provide key configuration values.
@@ -21,7 +21,7 @@ AwesomeConfig provides...
  - [Setup](#setup)
  - [Adding Configurations](#adding-configuration)
  - [Configuration Notation](#configuration-notation)
- - [Scope](#scope)
+ - [Nested Usage](#nested-usage)
  - [Variables](#variables)
  - [Placeholders](#placeholders)
  - [Conditions](#conditions)
@@ -52,7 +52,7 @@ You initially Setup configuration with 4 easy steps...
 const config = require("@awesomeeng/awesome-config");
 ```
 
-2). Initialize AwesomeConfig. This setups the configuration scope (see [Scope](#scope) later) and prepares configuration for additions.
+2). Initialize AwesomeConfig. This setups configuration and prepares configuration for additions.
 
 ```
 const config = require("@awesomeeng/awesome-config");
@@ -84,13 +84,13 @@ Once `config().start()` is called your configuration gets merged into a single c
 
 ### Usage
 
-You access your configuration as you would any JavaScript object. Say you have a configuration property called "one.two.three".  Simply access it thus:
+You access configuration as you would any JavaScript object. Say you have a configuration property called "one.two.three".  Simply access it thus:
 
 ```
 config.one.two.three
 ```
 
-If the property doesnt exist or any of its ancestors ("one" for example) does not exist, the property will return `undefined`.
+If the property doesnt exist or any of its ancestors ("one" for example) does not exist, the property throw an exception. This ensures that your configuration is always met or fails fast.
 
 Regardless of where you require AwesomeConfig, it exposes the same configuration details. This lets you initialize and start config once in your application, but access it from anywhere without the need to pass the config object around.
 
@@ -371,7 +371,7 @@ one.two: "mac"
 one.three: 13
 ```
 
-In AwesomeConfig's Configuration Notation, a condition impacts all of the coniguration that follows it, until a different condition is applied. In the above example, if the OS is "windows" the value of `one.two` after merging will be "windows".
+In AwesomeConfig's Configuration Notation, a condition impacts all of the configuration that follows it, until a different condition is applied. In the above example, if the OS is "windows" the value of `one.two` after merging will be "windows".
 
 An empty condition `[]` signals that **no condition* applies, thus returning the configuration to the default conditions state.
 
@@ -381,49 +381,44 @@ Note that conditions are only valid in AwesomeConfig Configuration Notation or i
 
 ### Variables and Placeholders
 
-THe configuration format supports both Variables and Placeholders. See the documentation for [Variables](#variables) and [Placeholders](#placeholders) below for more details.
+The configuration format supports both Variables and Placeholders. See the documentation for [Variables](#variables) and [Placeholders](#placeholders) below for more details.
 
-## Scope
+## Nested Usage
 
-In AwesomeConfig, scope defines the space to which a configuation applies.  Because AwesomeConfig is exposed as a singleton and availabe to anything that requires AwesomeConfig (`require("@awesomeeng/awesome-config")`) scope helps to control that.
+If you are writing an application that uses AwesomeConfig, but also requires a module that uses AwesomeConfig as well, the potential for conflicting views of config to exist.  By and large AwesomeConfig will attempt to resolve this by creating different configuration scope based on where the `Log.init()` method is called.  However, in some cases this could prove problematic.  To address this it is possible to specifically create an instance of AwesomeConfig and use that exclusively.  Any configuratino add to the specific instance is contained only to that instance and not add to the global AwesomeConfig object.
 
-Any time you call `config().init()` you create a new scope.  Then any module you rely on that requires AwesomeConfig will use that scope unless it has a scope of its own.  Consider the following:
+If you are writing a library that you expect others to require and are using AWesomeConfig, consider using nested usage instead of global usage.
+
+### Creating a specific instance
+
+You create a specific instance of config by passing a predetermined key into the `config()` method. This tells config to specifically use that instance. THis changes how your require AwesomeConifg slightly, but really only adds one more line of code.
 
 ```
-// MyMain.js
-const config = require("@awesomeeng/awesome-config");
-config().init();
-config.add({
-	one: "main"
-});
-config.start();
-
-const somemodule = require("./SomeModule.js");
-const another = require("./AnotherFile.js");
-
-console.log("MyMain.js",config.one); // outputs "main"
-
-//AnotherFile.js
-const config = require("@awesomeeng/awesome-config");
-
-console.log("AnotherFile.js",config.one); // outputs "main"
-
-//SomeModule.js
-const config = require("@awesomeeng/awesome-config");
-config().init();
-config.add({
-	one: "module"
-});
-config.start();
-
-console.log("SomeModule.js",config.one); // outputs "module"
+const AwesomeConfig = require("@awesomeeng/awesome-config");
+const config = AwesomeConfig("your magic key");
 ```
 
-SomeModule has a different scope then AnotherFile and MyMain because it called `config().init()` on its own.
+The key you use (`your magic key` in the example) can be any string you want so long as it is not an empty string. Any time you want to specifically use your specific instance, you simply provide your key.
 
-This allows modules to implement their own AwesomeConfig setup inside of their modules without worrying about their configuration leaking into other modules or users.
+Here's an example of setting up AwesomeConfig using a custom instance key.
 
-Scope works by comparing the execution stack against the list of modules that called `config().init()`. If the module or one of its ancestors is in that list, that is its scope.
+```
+const AwesomeConfig = require("@awesomeeng/awesome-config");
+const config = AwesomeConfig("your magic key");
+
+config().init();
+config().add(...);
+config().start();
+```
+
+And here's an example of using it elsewhere.
+
+```
+const AwesomeConfig = require("@awesomeeng/awesome-config");
+const config = AwesomeConfig("your magic key");
+
+console.log(config.one.two.three);
+```
 
 ## Variables
 
@@ -531,7 +526,7 @@ AwesomeConfig ships with a set of examples for your reference.
 
  - [Variables, Placeholders, and Conditions](./examples/VarsPlaceholdersConditions): An example of using AwesomeConfig variables, placeholders and conditions.
 
- - [Understanding Scope](./exmaples/UnderstandingScope): An example of how scope works.
+ - [Nested Usage](./examples/NestedUsage): An example of how to do nested usage.
 
 ## The Awesome Engineering Company
 
