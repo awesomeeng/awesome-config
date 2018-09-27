@@ -9,8 +9,8 @@ AwesomeConfig provides...
  - Uses JSON notation or our custom notation that supports mixing JSON style config and key/value style config;
  - Configuration is immutable once started;
  - Configuration is exposed as a plain JavaScript object for easy usage;
- - Configuration is a singleton so no passing your config object around manually;
- - Configuration is scoped to allow for multiple libraries to have separate configurations;
+ - Globally accessable config without the need to pass config objects around;
+ - Support for namespaced instances to isolated usage as needed;
  - Configuration Variables allow cross referencing other parts of your configuration;
  - Configuration Conditions allow you to toggle on/off different parts of your configuration based on external items like hostname, OS, or environment variables.
  - Configuration Plcaeholders to force users to provide key configuration values.
@@ -21,7 +21,7 @@ AwesomeConfig provides...
  - [Setup](#setup)
  - [Adding Configurations](#adding-configuration)
  - [Configuration Notation](#configuration-notation)
- - [Scope](#scope)
+ - [Namespaces](#namespaces)
  - [Variables](#variables)
  - [Placeholders](#placeholders)
  - [Conditions](#conditions)
@@ -52,7 +52,7 @@ You initially Setup configuration with 4 easy steps...
 const config = require("@awesomeeng/awesome-config");
 ```
 
-2). Initialize AwesomeConfig. This setups the configuration scope (see [Scope](#scope) later) and prepares configuration for additions.
+2). Initialize AwesomeConfig. This setups configuration and prepares configuration for additions.
 
 ```
 const config = require("@awesomeeng/awesome-config");
@@ -84,13 +84,13 @@ Once `config().start()` is called your configuration gets merged into a single c
 
 ### Usage
 
-You access your configuration as you would any JavaScript object. Say you have a configuration property called "one.two.three".  Simply access it thus:
+You access configuration as you would any JavaScript object. Say you have a configuration property called "one.two.three".  Simply access it thus:
 
 ```
 config.one.two.three
 ```
 
-If the property doesnt exist or any of its ancestors ("one" for example) does not exist, the property will return `undefined`.
+If the property doesnt exist or any of its ancestors ("one" for example) does not exist, the property throw an exception. This ensures that your configuration is always met or fails fast.
 
 Regardless of where you require AwesomeConfig, it exposes the same configuration details. This lets you initialize and start config once in your application, but access it from anywhere without the need to pass the config object around.
 
@@ -371,7 +371,7 @@ one.two: "mac"
 one.three: 13
 ```
 
-In AwesomeConfig's Configuration Notation, a condition impacts all of the coniguration that follows it, until a different condition is applied. In the above example, if the OS is "windows" the value of `one.two` after merging will be "windows".
+In AwesomeConfig's Configuration Notation, a condition impacts all of the configuration that follows it, until a different condition is applied. In the above example, if the OS is "windows" the value of `one.two` after merging will be "windows".
 
 An empty condition `[]` signals that **no condition* applies, thus returning the configuration to the default conditions state.
 
@@ -381,49 +381,56 @@ Note that conditions are only valid in AwesomeConfig Configuration Notation or i
 
 ### Variables and Placeholders
 
-THe configuration format supports both Variables and Placeholders. See the documentation for [Variables](#variables) and [Placeholders](#placeholders) below for more details.
+The configuration format supports both Variables and Placeholders. See the documentation for [Variables](#variables) and [Placeholders](#placeholders) below for more details.
 
-## Scope
+## Namespaces
 
-In AwesomeConfig, scope defines the space to which a configuation applies.  Because AwesomeConfig is exposed as a singleton and availabe to anything that requires AwesomeConfig (`require("@awesomeeng/awesome-config")`) scope helps to control that.
+AwesomeConfig is a global object, meaning that when you use AwesomeConfig in one part of your application, a second usage of it in a different part of your application uses the same object. If you are writing an application that uses AwesomeConfig, but also requires a module that uses AwesomeConfig as well, the potential for conflicting views of config or overwriting keys exists.  To resolve this, AwesomeConfig allows you to use an optional namespace parameter during require. If you are writing a library that you expect others to require and are using AWesomeConfig, consider using a namespace instead of global usage.
 
-Any time you call `config().init()` you create a new scope.  Then any module you rely on that requires AwesomeConfig will use that scope unless it has a scope of its own.  Consider the following:
+When you use a namespace you are creating an entirely separate instance of AwesomeConfig to which you can `init()`, `start()`, and `add()` without fear of conflicting with another namespace or the global namespace.  Furthermore, you can reference your namespace in other parts of your application without having to pass AwesomeConfig around; you just need to know the namespace name.
+
+### Using a Namespace
+
+When you require AwesomeConfig as shown below you are return the global instance of AwesomeConfig.
 
 ```
-// MyMain.js
-const config = require("@awesomeeng/awesome-config");
-config().init();
-config.add({
-	one: "main"
-});
-config.start();
-
-const somemodule = require("./SomeModule.js");
-const another = require("./AnotherFile.js");
-
-console.log("MyMain.js",config.one); // outputs "main"
-
-//AnotherFile.js
-const config = require("@awesomeeng/awesome-config");
-
-console.log("AnotherFile.js",config.one); // outputs "main"
-
-//SomeModule.js
-const config = require("@awesomeeng/awesome-config");
-config().init();
-config.add({
-	one: "module"
-});
-config.start();
-
-console.log("SomeModule.js",config.one); // outputs "module"
+const AwesomeConfig = require("@awesomeeng/awesome-config");
 ```
 
-SomeModule has a different scope then AnotherFile and MyMain because it called `config().init()` on its own.
+To switch to a different name space, change your require statement like this:
 
-This allows modules to implement their own AwesomeConfig setup inside of their modules without worrying about their configuration leaking into other modules or users.
+```
+const AwesomeConfig = require("@awesomeeng/awesome-config");
+const config = AwesomeConfig("your namespace name");
+```
 
-Scope works by comparing the execution stack against the list of modules that called `config().init()`. If the module or one of its ancestors is in that list, that is its scope.
+You can shortcut this to one line if you like, thus:
+
+```
+const config = require("@awesomeeng/awesome-config")("your namespace name");
+```
+
+Any time you require with the same namespace name, you get the same instance. This lets you access a specific namespaced instance anywhere you like. Because of this it is recommended that you use fairly unique namespace names. Calling your namespace "config" or "namespace" is probably a poor idea; consider something like "MyAwsesomeModuleNamespace".
+
+Here's an example of setting up AwesomeConfig using a custom namespace.
+
+```
+const AwesomeConfig = require("@awesomeeng/awesome-config");
+const config = AwesomeConfig("MyAwesomeModuleNamespace");
+
+config().init();
+config().add(...);
+config().start();
+```
+
+And here's an example of using it elsewhere.
+
+```
+const AwesomeConfig = require("@awesomeeng/awesome-config");
+const config = AwesomeConfig("MyAwesomeModuleNamespace");
+
+console.log(config.one.two.three);
+```
 
 ## Variables
 
@@ -531,7 +538,7 @@ AwesomeConfig ships with a set of examples for your reference.
 
  - [Variables, Placeholders, and Conditions](./examples/VarsPlaceholdersConditions): An example of using AwesomeConfig variables, placeholders and conditions.
 
- - [Understanding Scope](./exmaples/UnderstandingScope): An example of how scope works.
+ - [Namespaces](./examples/Namespaces): An example of how to use namespaces.
 
 ## The Awesome Engineering Company
 

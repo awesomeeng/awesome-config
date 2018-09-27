@@ -11,8 +11,8 @@
     "node": ">=10.5.0"
   },
   "dependencies": {
-    "@awesomeeng/awesome-log": "^2.0.2",
-    "@awesomeeng/awesome-utils": "^1.1.1"
+    "@awesomeeng/awesome-log": "^2.1.0",
+    "@awesomeeng/awesome-utils": "^1.2.0"
   },
   "devDependencies": {
     "jsdoc-to-markdown": "*",

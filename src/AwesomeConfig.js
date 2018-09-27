@@ -16,6 +16,8 @@ Log.start();
 
 const ConfigInstance = require("./ConfigInstance");
 
+const instances = {};
+
 /**
  * The AwesomeConfig class is instantiated and returned whenever you
  * require("AwesomeConfig").
@@ -69,89 +71,41 @@ const ConfigInstance = require("./ConfigInstance");
  */
 class AwesomeConfig {
 	/**
+	 * @private
+	 *
 	 * @constructor
 	 */
 	constructor() {
-		let instances = {};
-
 		Log.info("Installed.");
+		return getInstanceProxy();
+	}
+}
 
-		/**
-		 * @private
-		 */
-		const getInstance = function getInstance() {
-			let stack = AwesomeUtils.Module.stack(2);
+/**
+ * @private
+ *
+ * Internally used to hold the instance information for config.
+ */
+class AwesomeConfigProxy {
+	constructor(instanceName) {
+		let me = this;
 
-			let instance = null;
-
-			while (true) {
-				let entry = stack.shift();
-				if (!entry) break;
-
-				let id = entry.source;
-				instance = instances[id];
-				if (instance) break;
-
-				instance = null;
-			}
-
-			if (instance) return instance;
-
-			return null;
-		};
-
-		const init = function init() {
-			let id = AwesomeUtils.Module.source(3);
-
-			if (!instances[id]) instances[id] = new ConfigInstance(id);
-			return apply();
-		};
-
-		const start = function start() {
-			let instance = getInstance();
-			if (!instance) throw new Error("init() must be called before start().");
-			if (!instance.started) instance.start();
-			return apply();
-		};
-
-		const stop = function stop() {
-			let instance = getInstance();
-			if (!instance) throw new Error("init() must be called before stop().");
-			if (instance.started) instance.stop();
-			return apply();
-		};
-
-		const add = function add(content,defaultConditions="",encoding="utf-8") {
-			let instance = getInstance();
-			if (!instance) throw new Error("init() must be called before add().");
-			if (instance.started) throw new Error("add() must be called before start().");
-			instance.add(content,defaultConditions,encoding);
-			return apply();
-		};
-
-		const reset = function reset() {
-			let instance = getInstance();
-			if (!instance) throw new Error("init() must be called before reset().");
-			instance.reset();
-			return apply();
-		};
+		me.instanceName = instanceName;
 
 		const has = function has(target,prop) {
-			let instance = getInstance();
-			if (!instance) return false;
-			if (!instance.started) return false;
+			if (!me.instance) return false;
+			if (!me.instance.started) return false;
 
-			return instance.config[prop]!==undefined;
+			return me.instance.config[prop]!==undefined;
 		};
 
 		const get = function get(target,prop) {
-			let instance = getInstance();
-			if (!instance) return undefined;
-			if (!instance.started) return undefined;
-			if (!instance.config) return undefined;
-			if (!instance.config[prop]) throw new Error("Missing configuration property '"+prop+"'.");
-			
-			return instance.config[prop];
+			if (!me.instance) return undefined;
+			if (!me.instance.started) return undefined;
+			if (!me.instance.config) return undefined;
+			if (!me.instance.config[prop]) throw new Error("Missing configuration property '"+prop+"'.");
+
+			return me.instance.config[prop];
 		};
 
 		const set = function set() {
@@ -159,69 +113,105 @@ class AwesomeConfig {
 		};
 
 		const getOwnPropertyDescriptor = function getOwnPropertyDescriptor(target,prop) {
-			// this resolve an error with ownKeys requiring a 'prototype' member.
+			// me resolve an error with ownKeys requiring a 'prototype' member.
 			if (prop==="prototype") return {value: null, writable: false, enumerable: false, configurable: false};
 
-			let instance = getInstance();
-			if (!instance) return undefined;
-			if (!instance.started) return undefined;
+			if (!me.instance) return undefined;
+			if (!me.instance.started) return undefined;
 
-			return Object.getOwnPropertyDescriptor(instance.config,prop);
+			return Object.getOwnPropertyDescriptor(me.instance.config,prop);
 		};
 
 		const ownKeys = function ownKeys() {
 			// we need to include ["prototype"] or we get wierd proxy errors.
 			//
-			let instance = getInstance();
-			if (!instance) return ["prototype"];
-			if (!instance.started) return ["prototype"];
+			if (!me.instance) return ["prototype"];
+			if (!me.instance.started) return ["prototype"];
 
-			return [].concat(Object.getOwnPropertyNames(instance.config),["prototype"]);
+			return [].concat(Object.getOwnPropertyNames(me.instance.config),["prototype"]);
 		};
 
-		const toString = function toString() {
-			let instance = getInstance();
-			if (!instance) return undefined;
-			if (!instance.started) return undefined;
+		let config = function config(target,thisArg,args) {
+			let instanceName = args[0] || undefined;
 
-			let s = "";
-			Object.keys(instance.config).forEach((key)=>{
-				s += (s?",\n":"")+"  \""+key+"\": "+JSON.stringify(instance.config[key],null,2).replace(/\n/g,"\n  ");
-			});
-			return "{\n"+s+"\n}";
+			if (instanceName===undefined) {
+				return me;
+			}
+			else {
+				return getInstanceProxy(instanceName);
+			}
 		};
 
-		const apply = function config() {
-			let instance = getInstance();
-			let initialized = !!instance;
-			let started = instance && instance.started || false;
-			let sources = instance && instance.sources || [];
-			sources = sources.map((source)=>{
-				return source.origin;
-			});
-
-			return {
-				init,
-				initialized,
-				start,
-				stop,
-				started,
-				add,
-				sources,
-				reset,
-				toString
-			};
-		};
-
-		return new Proxy(apply,{
-			has,
-			get,
-			set,
-			getOwnPropertyDescriptor,
-			ownKeys,
-			apply: apply
+		return new Proxy(config,{
+			has: has,
+			get: get,
+			set: set,
+			getOwnPropertyDescriptor: getOwnPropertyDescriptor,
+			ownKeys: ownKeys,
+			apply: config
 		});
 	}
+
+	get initialized() {
+		return !!this.instance;
+	}
+
+	get started() {
+		return this.instance && this.instance.started || false;
+	}
+
+	get sources() {
+		let sources = this.instance && this.instance.sources || [];
+		return sources.map((source)=>{
+			return source.origin;
+		});
+	}
+
+	init() {
+		this.instance = new ConfigInstance(this.instanceName);
+		return this;
+	}
+
+	start() {
+		if (!this.instance) throw new Error("init() must be called before start().");
+		if (!this.instance.started) this.instance.start();
+		return this;
+	}
+
+	stop() {
+		if (!this.instance) throw new Error("init() must be called before stop().");
+		if (this.instance.started) this.instance.stop();
+		return this;
+	}
+
+	add(content,defaultConditions="",encoding="utf-8") {
+		if (!this.instance) throw new Error("init() must be called before add().");
+		if (this.instance.started) throw new Error("add() must be called before start().");
+		this.instance.add(content,defaultConditions,encoding);
+		return this;
+	}
+
+	reset() {
+		if (!this.instance) throw new Error("init() must be called before reset().");
+		this.instance.reset();
+		return this;
+	}
+
+	toString() {
+		if (!this.instance) return undefined;
+		if (!this.instance.started) return undefined;
+
+		let s = "";
+		Object.keys(this.instance.config).forEach((key)=>{
+			s += (s?",\n":"")+"  \""+key+"\": "+JSON.stringify(this.instance.config[key],null,2).replace(/\n/g,"\n  ");
+		});
+		return "{\n"+s+"\n}";
+	}
 }
+
+const getInstanceProxy = function(instanceName="") {
+	if (!instances[instanceName]) instances[instanceName] = new AwesomeConfigProxy(instanceName);
+	return instances[instanceName];
+};
 
 module.exports = new AwesomeConfig();

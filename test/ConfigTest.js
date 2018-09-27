@@ -154,7 +154,4 @@ describe("Config",function(){
 		});
 		assert.strictEqual(config.one.two.three,123);
 	});
-
-
-
 });
