@@ -4,7 +4,7 @@
 
 const assert = require("assert");
 
-let config = require("../src/AwesomeConfig");
+let config = require("../src/AwesomeConfig")("ConfigTestModule");
 
 class ConfigTestModule {
 	constructor() {

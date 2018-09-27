@@ -88,22 +88,24 @@ class AwesomeConfig {
  */
 class AwesomeConfigProxy {
 	constructor(instanceName) {
-		this.instanceName = instanceName;
+		let me = this;
+
+		me.instanceName = instanceName;
 
 		const has = function has(target,prop) {
-			if (!this.instance) return false;
-			if (!this.instance.started) return false;
+			if (!me.instance) return false;
+			if (!me.instance.started) return false;
 
-			return this.instance.config[prop]!==undefined;
+			return me.instance.config[prop]!==undefined;
 		};
 
 		const get = function get(target,prop) {
-			if (!this.instance) return undefined;
-			if (!this.instance.started) return undefined;
-			if (!this.instance.config) return undefined;
-			if (!this.instance.config[prop]) throw new Error("Missing configuration property '"+prop+"'.");
+			if (!me.instance) return undefined;
+			if (!me.instance.started) return undefined;
+			if (!me.instance.config) return undefined;
+			if (!me.instance.config[prop]) throw new Error("Missing configuration property '"+prop+"'.");
 
-			return this.instance.config[prop];
+			return me.instance.config[prop];
 		};
 
 		const set = function set() {
@@ -111,35 +113,42 @@ class AwesomeConfigProxy {
 		};
 
 		const getOwnPropertyDescriptor = function getOwnPropertyDescriptor(target,prop) {
-			// this resolve an error with ownKeys requiring a 'prototype' member.
+			// me resolve an error with ownKeys requiring a 'prototype' member.
 			if (prop==="prototype") return {value: null, writable: false, enumerable: false, configurable: false};
 
-			if (!this.instance) return undefined;
-			if (!this.instance.started) return undefined;
+			if (!me.instance) return undefined;
+			if (!me.instance.started) return undefined;
 
-			return Object.getOwnPropertyDescriptor(this.instance.config,prop);
+			return Object.getOwnPropertyDescriptor(me.instance.config,prop);
 		};
 
 		const ownKeys = function ownKeys() {
 			// we need to include ["prototype"] or we get wierd proxy errors.
 			//
-			if (!this.instance) return ["prototype"];
-			if (!this.instance.started) return ["prototype"];
+			if (!me.instance) return ["prototype"];
+			if (!me.instance.started) return ["prototype"];
 
-			return [].concat(Object.getOwnPropertyNames(this.instance.config),["prototype"]);
+			return [].concat(Object.getOwnPropertyNames(me.instance.config),["prototype"]);
 		};
 
-		let proxy = function() {
-			return this;
+		let config = function config(target,thisArg,args) {
+			let instanceName = args[0] || undefined;
+
+			if (instanceName===undefined) {
+				return me;
+			}
+			else {
+				return getInstanceProxy(instanceName);
+			}
 		};
 
-		return new Proxy(proxy,{
-			has: has.bind(this),
-			get: get.bind(this),
-			set: set.bind(this),
-			getOwnPropertyDescriptor: getOwnPropertyDescriptor.bind(this),
-			ownKeys: ownKeys.bind(this),
-			apply: proxy.bind(this)
+		return new Proxy(config,{
+			has: has,
+			get: get,
+			set: set,
+			getOwnPropertyDescriptor: getOwnPropertyDescriptor,
+			ownKeys: ownKeys,
+			apply: config
 		});
 	}
 

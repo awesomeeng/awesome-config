@@ -194,7 +194,7 @@ class ConfigInstance {
 		let valid = false;
 		if (AwesomeUtils.Object.isPlainObject(content)) {
 			valid = true;
-			origin = AwesomeUtils.Module.sourceAndLine(2);
+			origin = AwesomeUtils.VM.executionSourceAndLine(4);
 			sources = sources.concat([new ConfigSource(origin,content,defaultConditions)]);
 		}
 		else if (typeof content==="string") {
@@ -202,7 +202,7 @@ class ConfigInstance {
 			let filename,stat;
 			if (resolved) ({stat,filename} = resolved);
 			if (!stat) {
-				origin = AwesomeUtils.Module.sourceAndLine(2);
+				origin = AwesomeUtils.VM.executionSourceAndLine(4);
 				sources = sources.concat(this.parser.parse(origin,content,defaultConditions));
 				if (content) valid = true;
 			}
