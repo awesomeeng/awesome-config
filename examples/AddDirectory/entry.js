@@ -17,16 +17,16 @@ config().start();
 // test
 const assert = require("assert");
 assert.strictEqual(config.zero,0);
-assert.equal(config.one,"odd");
-assert.equal(config.two,"even");
-assert.equal(config.three,"odd");
-assert.equal(config.four,"even");
-assert.equal(config.five,"odd");
-assert.equal(config.six,"even");
-assert.equal(config.seven,"odd");
-assert.equal(config.eight,"even");
-assert.equal(config.nine,"odd");
-assert.equal(config().sources.length,3);
+assert.strictEqual(config.one,"odd");
+assert.strictEqual(config.two,"even");
+assert.strictEqual(config.three,"odd");
+assert.strictEqual(config.four,"even");
+assert.strictEqual(config.five,"odd");
+assert.strictEqual(config.six,"even");
+assert.strictEqual(config.seven,"odd");
+assert.strictEqual(config.eight,"even");
+assert.strictEqual(config.nine,"odd");
+assert.strictEqual(config().sources.length,3);
 
 // print out config for deeper understanding...
 console.log(config().sources);

@@ -118,8 +118,7 @@ class AwesomeConfigProxy {
 			if (!me.instance) return undefined;
 			if (!me.instance.started) return undefined;
 			if (!me.instance.config) return undefined;
-			if (!me.instance.config[prop]) throw new Error("Missing configuration property '"+prop+"'.");
-
+			if (me.instance.config[prop]===undefined) throw new Error("Missing configuration property '"+prop+"'.");
 			return me.instance.config[prop];
 		};
 

@@ -110,14 +110,14 @@ class ConfigInstance {
 			root = AwesomeUtils.Object.extend(root,source.content);
 		});
 
+		// run the resulting object through our resolver.
+		if (this.resolver) this.resolver.resolve(root);
+
 		// prevent our nested children from being mutated.
 		// We handle this for the nested child itself in the AwesomeConfig proxy.
 		Object.keys(root).forEach((key)=>{
 			AwesomeUtils.Object.deepFreeze(root[key]);
 		});
-
-		// run the resulting object through our resolver.
-		if (this.resolver) this.resolver.resolve(root);
 
 		// make our configuration.
 		this[$CONFIG] = root;
@@ -210,7 +210,10 @@ class ConfigInstance {
 			}
 			else if (stat && stat.isDirectory()) {
 				let dir = filename;
-				FS.readdirSync(dir).forEach((filename)=>{
+
+				let files = FS.readdirSync(dir);
+				files = files.sort();
+				files.forEach((filename)=>{
 					filename = Path.resolve(dir,filename);
 					if (filename.endsWith(".cfg")) this.add(filename,defaultConditions,encoding);
 				});
@@ -234,7 +237,7 @@ class ConfigInstance {
 
 /**
  * @private
- * 
+ *
  * Given some filename, resolve that filename relative to your current working directory, or
  * if that fails, against the directory of the calling module.
  *
