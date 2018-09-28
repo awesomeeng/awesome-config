@@ -1,4 +1,4 @@
-# [AwesomeConfig](../README.md) > Merging
+# [AwesomeConfig](../README.md) > Understanding Merging
 
 This articles describes how AwesomeConfig merges different configurations together to produce the final configuration view. This process occurs whenever you call `config().start()` and takes into account the added configurations and their conditions.
 

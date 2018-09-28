@@ -1,25 +1,25 @@
 # AwesomeConfig
 
-AwesomeConfig is a powerful configuration system for building enterpreise ready node.js application. It provides scoped, transparent configuration objects to your application based on configuration files or objects that you define.  It includes support for conditional configuration sections based on external things like environment variables, hostname, or OS; variables to reference one part of your configuration from another; and lots more.
+AwesomeConfig is a powerful configuration system for building enterprise ready node.js application. It provides a unified transparent configuration object to your application based on configuration files or objects that you define.  It includes support for conditional configuration based on external values like environment variables, hostname, or OS; variables to reference one part of your configuration from another; and lots more.
 
 ## Features
 
 AwesomeConfig provides...
  - Add configuration from files, directories, as JSON, or as a plain javascript objects;
  - Uses JSON notation or our custom notation that supports mixing JSON style config and key/value style config;
- - Configuration is immutable once started;
- - Configuration is exposed as a plain JavaScript object for easy usage;
  - Globally accessable config without the need to pass config objects around;
- - Support for namespaced instances to isolated usage as needed;
+ - Configuration is exposed as a plain JavaScript object for easy usage;
+ - Support for namespaced instances to isolate usage as needed;
+ - Configuration is immutable once started;
  - Configuration Variables allow cross referencing other parts of your configuration;
- - Configuration Conditions allow you to toggle on/off different parts of your configuration based on external items like hostname, OS, or environment variables.
+ - Configuration Conditions allow you to toggle on/off different parts of your configuration based on external values like hostname, OS, or environment variables.
  - Configuration Plcaeholders to force users to provide key configuration values.
- - No reserved words at all!
+ - No reserved words.
 
 ## Contents
  - [Installation](#installation)
  - [Setup](#setup)
- - [Adding Configurations](#adding-configuration)
+ - [Adding Configurations](#adding-configurations)
  - [Configuration Notation](#configuration-notation)
  - [Namespaces](#namespaces)
  - [Variables](#variables)
@@ -40,7 +40,7 @@ npm install --save @awesomeeng/awesome-config
 
 ## Setup
 
-To use AwesomeConifg you need to go through four steps to set it up and add configuration into it. These four steps should be done at the top module of your project, or as close to the top as possible.  Once AwesomeConfig is started, all subsquent requires of config (aka `const config = require("@awesomeeng/awesome-config")`) will return the fully started configuration. This allows you to setup your config at the top of your application and then just use it in subsequent parts of your application without needing to pass it around manually.
+To use AwesomeConifg you need to go through four steps to set it up and add configuration into it. These four steps should be done at the top module of your project or as close to the top as possible.  Once AwesomeConfig is started all subsquent requires of config (aka `const config = require("@awesomeeng/awesome-config")`) will return the fully started configuration. This allows you to setup your config at the top of your application and then just use it in subsequent parts of your application without needing to pass a configuration around manually.
 
 ### Initial Setup
 
@@ -59,7 +59,7 @@ const config = require("@awesomeeng/awesome-config");
 config().init();
 ```
 
-**Note that we call `config()` when we are referencing our configuration meta systems like `init()` or 'start()'. We use just `config` when we are referencing actual configuration properties.  This separation allows AwesomeConfig to have zero reserved words and lets you express your configuration however you want.**
+**Note that we call `config()` when we are referencing our configuration management systems like `init()` or 'start()'. We use just `config` when we are referencing actual configuration properties.  This separation allows AwesomeConfig to have zero reserved words and lets you express your configuration however you want.**
 
 3). Add zero or more configurations:
 
@@ -69,7 +69,7 @@ config().init();
 config().add(someconfig);
 ```
 
-There are a variety of ways to add configurations, so make sure to read the [Adding Configurations](#adding-configuration) section below.
+There are a variety of ways to add configurations, so make sure to read the [Adding Configurations](#adding-configurations) section below.
 
 4). Start AwesomeConfig:
 
@@ -90,7 +90,7 @@ You access configuration as you would any JavaScript object. Say you have a conf
 config.one.two.three
 ```
 
-If the property doesnt exist or any of its ancestors ("one" for example) does not exist, the property throw an exception. This ensures that your configuration is always met or fails fast.
+If the property doesnt exist or any of its ancestors ("one" for example) does not exist, the property throws an exception. This ensures that your configuration is always met or fails fast.
 
 Regardless of where you require AwesomeConfig, it exposes the same configuration details. This lets you initialize and start config once in your application, but access it from anywhere without the need to pass the config object around.
 
@@ -103,8 +103,9 @@ There is a little more nuance to it, but that is basically all there is to using
 
 ## Adding Configurations
 
-You can add configuration in four basic ways: A JavaScript Object, a JSON String, a resolved filename, or a resolved directory. Each approach has
-slight differences to what happens. You may also add as many configurations you want before calling `config().start()`.
+You can add configuration in five basic ways: A JavaScript Object, a JSON String, an AwesomeConfig Notation string, a resolved filename, or a resolved directory. Each approach has slight differences and fits different needs.
+
+You may add as many configurations you want before calling `config().start()`.
 
 When `config().start()` is called, all of the added configurations are merged together into a single configuration view.  The order they are merged is the order in which they are added, thus things added later will overwrite things added earlier if they have the same property names. This intentionally lets you provide some values, but then override them later as needed.
 
@@ -146,6 +147,28 @@ This would result in the following properties:
 config.one === 1
 ```
 
+### Adding an AwesomeConfig Notation String Configuration
+
+You can add a AwesomeConfig Notation String. AwesomeConfig will parse the string using the AwesomeConfig Notation parser and the resulting configuration will be added.
+
+```
+config().add(`
+	one.two.three: 123
+	{
+		four: {
+			five: 45
+		}
+	}
+`);
+```
+
+This would result in the following properties:
+
+```
+config.one.two.three === 123
+config.four.five === 45
+```
+
 ### Adding A Filename Configuration
 
 You may pass a filename into `config().add()` and the file contents will be loaded, parsed using the AwesomeConfig Notation parser (see [Configuration Notation](#configuration-notation) below), and the resulting objects and conditions are added.
@@ -158,7 +181,7 @@ config().add("./MyConfig.cfg");
 
 ### Adding A Directory Configuration
 
-Passing a directory into `config().add()` will result in all files within the directory that match `*.cfg` being loaded (via `config().add(filename)` from above). The order the files are loaded is based on their alphabetical order in the directory.
+Passing a directory into `config().add()` will result in all files within the directory that match `*.cfg` being loaded (via `config().add(filename)` from above). The order the files are loaded is based on their case sensitive alphabetical order in the directory.
 
 ### Adding with Conditions
 
@@ -172,7 +195,7 @@ See [Conditions](#conditions) below for more information on condition strings.
 
 ## Configuration Notation
 
-AwesomeConfig configuration files use a custom configuration notation that is a hybrid of both JSON and key/value pairs.  If you want to just use pure JSON that is fine as well. However, AwesomeConfig notation gives you a little bit more such as comments, conditions, key/values, variables, placeholders, and mixing key/values with json.
+AwesomeConfig configuration files use a custom configuration notation that is a hybrid of both JSON and key/value pairs.  If you want to just use pure JSON that is fine. However, AwesomeConfig notation gives you a little bit more such as comments, conditions, key/values, variables, placeholders, and mixing key/values with json.
 
 ### Example
 
@@ -204,7 +227,7 @@ eight.0.nine = 89
 
 In the example you will notice a few things going on:
 
-First we have a standard key/value pair in "one.two.three". The dot notation is used to separate the path into levels.  The key/value pair notation form shave a lot of space and creates cleaner configurations. If we wanted to write the same using JSON it would look like this:
+First we have a standard key/value pair in "one.two.three". The dot notation is used to separate the path into levels.  The key/value pair notation form saves a lot of space and creates cleaner configurations. If we wanted to write the same using JSON it would look like this:
 
 ```
 {
@@ -225,15 +248,15 @@ Finally, we have a key in "eight" which takes an array as its argument, which in
 An AwesomeConfig file has the following structure:
 
 ```
-config = [comment|json_block|key_value_pair|condition]*
+config = [<comment>|<json_block>|<key_value_pair>|<condition>]*
 ```
 
-That is it may at the top level have a comment, a json block, a key/value pair, or a condition.  We look at each of these below...
+That is the top level have a comment, a json block, a key/value pair, or a condition.  We look at each of these below...
 
 ### Comments
 
 ```
-comment = [double_slash_comment|hash_comment|multi_line_comment]
+comment = [<double_slash_comment>|<hash_comment>|<multi_line_comment>]
 ```
 
 AwesomeConfig files support three different types of comments:
@@ -260,7 +283,7 @@ AwesomeConfig files support three different types of comments:
 ### JSON Block
 
 ```
-json_block = "{" [json] "}"
+json_block = "{" [<json>] "}"
 ```
 
 A JSON block is a valid JSON string that begins with the open brace character ("{") and ends with the close brace character ("}"). Array JSON blocks are not supported at the top level.
@@ -299,7 +322,7 @@ one.two=12
 #### Values
 
 ```
-value = ["null"|boolean|number|string|quoted_string|array|object]
+value = ["null"|<boolean>|<number>|<string>|<quoted_string>|<array>|<object>]
 ```
 
 A value may be a null, a boolean, a number, a string, a quoted string, an array, or an object.
@@ -347,7 +370,7 @@ A value may be a null, a boolean, a number, a string, a quoted string, an array,
 ### Conditions
 
 ```
-condition = "[" [condition] "]"
+condition = "[" [<condition>] "]"
 ```
 
 Conditions describe certain criteria that must be met in order for the configuration that follows to be included when merged (during `config().start()`).  Conditions within the Configuration Notation start with an open brakcet ("[") character and terminate in a close bracket ("]") character. Condition may never be nested in another object like a key/value pair or a JSON block; they may only be used at the top level.
@@ -373,9 +396,9 @@ one.three: 13
 
 In AwesomeConfig's Configuration Notation, a condition impacts all of the configuration that follows it, until a different condition is applied. In the above example, if the OS is "windows" the value of `one.two` after merging will be "windows".
 
-An empty condition `[]` signals that **no condition* applies, thus returning the configuration to the default conditions state.
+An empty condition `[]` signals that **no condition* applies, thus returning the configuration to the default condition state.
 
-For more information on condition check out the [Conditions](#conditions) section below.
+For more information on conditions check out the [Conditions](#conditions) section below.
 
 Note that conditions are only valid in AwesomeConfig Configuration Notation or if you pass them into the `config().add()` method as the second argument.
 
@@ -385,7 +408,7 @@ The configuration format supports both Variables and Placeholders. See the docum
 
 ## Namespaces
 
-AwesomeConfig is a global object, meaning that when you use AwesomeConfig in one part of your application, a second usage of it in a different part of your application uses the same object. If you are writing an application that uses AwesomeConfig, but also requires a module that uses AwesomeConfig as well, the potential for conflicting views of config or overwriting keys exists.  To resolve this, AwesomeConfig allows you to use an optional namespace parameter during require. If you are writing a library that you expect others to require and are using AWesomeConfig, consider using a namespace instead of global usage.
+AwesomeConfig is a global object, meaning that when you use AwesomeConfig in one part of your application, a second usage of it in a different part of your application uses the same object. If you are writing an application that uses AwesomeConfig, but also requires a module that uses AwesomeConfig as well, the potential for conflicting views of config or overwriting keys exists.  To resolve this, AwesomeConfig allows you to use an optional namespace parameter during require. If you are writing a library that you expect others to require and are using AwesomeConfig, consider using a namespace instead of global usage.
 
 When you use a namespace you are creating an entirely separate instance of AwesomeConfig to which you can `init()`, `start()`, and `add()` without fear of conflicting with another namespace or the global namespace.  Furthermore, you can reference your namespace in other parts of your application without having to pass AwesomeConfig around; you just need to know the namespace name.
 
@@ -410,7 +433,7 @@ You can shortcut this to one line if you like, thus:
 const config = require("@awesomeeng/awesome-config")("your namespace name");
 ```
 
-Any time you require with the same namespace name, you get the same instance. This lets you access a specific namespaced instance anywhere you like. Because of this it is recommended that you use fairly unique namespace names. Calling your namespace "config" or "namespace" is probably a poor idea; consider something like "MyAwsesomeModuleNamespace".
+Any time you require with the same namespace name, you get the same instance. If you require without a namespace name, you get the global namespace. This lets you access a specific namespaced instance anywhere you like. Because of this it is recommended that you use fairly unique namespace names. Calling your namespace "config" or "namespace" is probably a poor idea; consider something like "MyAwsesomeModuleNamespace".
 
 Here's an example of setting up AwesomeConfig using a custom namespace.
 
@@ -445,32 +468,32 @@ one.four: ${one.three}
 one.five: "${one.four} and FIVE!"
 ```
 
-When you call `config().start()` AwesomeConfig merges all the added configurations together to form a single configuration view.  Then it iterates the entire configuration looking for any Variables and replaces those variables with their appropriate values.  You can even have variables that reference variables and so on, as shown in the example above.
+When you call `config().start()` AwesomeConfig merges all the added configurations together to form a single configuration view.  Then it iterates the entire configuration looking for any variables and replaces those variables with their appropriate values.  You can even have variables that reference variables and so on, as shown in the example above.
 
 If for some reason a variable cannot resolve, you will get an exception immediately.
 
-You can use a variable anywhere you would have a value.  In key/value pairs you can simple have the variable in place of the string; in JSON blocks you should wrap the variable in quotes like `"${blah}"` so the JSON will validate.
+You can use a variable anywhere you would have a value.  In key/value pairs you can simply have the variable in place of the string; in JSON blocks you should wrap the variable in quotes like `"${blah}"` so the JSON will validate.
 
 Variables get replaced by the exact content they are referencing.  If the variable is the entire content of the string, it will replace the string with the type of the resolved variable as for `one.three` and `one.four` from the example above.  However, if the variable is only a portion of the content, it will **string concatenate** the contents together, as shown in the example above for `one.five` which would return `12 and FIVE!` as a string.
 
 ### Special Variables
 
-In addition to referencing specific portions of config using variables, you can also use variables to get a number of special values as described below:
+In addition to referencing specific portions of config using variables you can also use variables to get a number of special values as described below:
 
  - **${env:xyz}**: Returns the envionment variables specified, xyz in this case.
 
- - **${hostname:domain}**: returns the last two parts of the hostname, the "google.com" portion.
- - **${hostname:fqdn}**: same as `${hostname:full}`.
- - **${hostname:full}**: returns the entire hostname string.
+ - **${hostname:domain}**: Returns the last two parts of the hostname, the "google.com" portion.
+ - **${hostname:fqdn}**: Same as `${hostname:full}`.
+ - **${hostname:full}**: Returns the entire hostname string.
  - **${hostname:name}**: Returns the first part of the hostname strig, everything up tot he first dot.
 
- - **${process:args}**: returns the arguments passed to the process, as a string.
+ - **${process:args}**: Returns the arguments passed to the process, as a string.
  - **${process:cwd}**: Returns the current working directory.
- - **${process:exec}**: returns the executable (usually "node" or "node.exe") that ran node.
- - **${process:execPath}**: returns the executable (usually "node" or "node.exe") that ran node.
+ - **${process:exec}**: Returns the executable (usually "node" or "node.exe") that ran node.
+ - **${process:execPath}**: Returns the executable (usually "node" or "node.exe") that ran node.
  - **${process:main}**: Returns the script executed by node at startup.
- - **${process:pid}**: returns the process pid.
- - **${process:ppid}**: returns te process parent pid.
+ - **${process:pid}**: Returns the process pid.
+ - **${process:ppid}**: Returns te process parent pid.
  - **${process:script}**: Returns the script executed by node at startup.
  - **${process:version}**: Returns node.js version, as a string.
 
@@ -498,15 +521,15 @@ one.three: <<one.three is required for this product.>>
 one.two: blah
 ````
 
-A placeholder has the form `<<description>>`. The `description` is used in the event the placeholder is not overwritten in the error message.
+A placeholder has the form `<<description>>`. The `description` is used in the resulting exception if the placeholder is not overwritten at the time `config().start()` is called.
 
 In the above example the first instance of `one.two` and the instance of `one.three` both contain placeholders.  Later, `one.two` is overwritten and thus the placeholder is removed.  But `one.three` never gets overwritten (at least in this example) and thus when `config().start()` is called, an exception will occur to indicate that the placeholder has not been replaced.
 
-Placeholders work in conjunction with varaibles really nicely, but they are entirely optional. Use em if you want em.
+Placeholders work in conjunction with varaibles really nicely, but they are entirely optional.
 
 ## Conditions
 
-Conditions describe certain criteria that must be met in order for the configuration it applies to to be included when merged (during `config().start()`). Conditions can be applied as the second argument of `config().add()` or they can be used inline in the AwesomeConfig Configuration Notation (see [Configuration Notation](#configuration-notation) above).
+Conditions describe certain criteria that must be met in order for the configuration to which it applies to be included when merged (during `config().start()`). Conditions can be applied as the second argument of `config().add()` or they can be used inline in the AwesomeConfig Configuration Notation (see [Configuration Notation](#configuration-notation) above).
 
 A condition is a string that express one or more conditions that must be met.  Here are some examples:
 
@@ -518,12 +541,12 @@ hostname:name=test or hostname:name=dev
 (hostname:domain=acme.com and env:target=development) or hostname:full=localhost
 ```
 
-A conditions support boolean operators like `not` and `and` and `or` as well as grouping with `(condition)`.  Each condition is slightly different in how it works, so we suggest you read the [Condition Expressions](./docs/Conditions.md) documentation to learn more.
+A conditions support boolean operators like `not` and `and` and `or` as well as grouping with `(<condition>)`.  Each condition is slightly different in how it works, so we suggest you read the [Condition Expressions](./docs/Conditions.md) documentation to learn more.
 
 ## Documentation
 
  - [Understanding Merging](./docs/Merging.md)
- - [Variables and Placeholder](./docs/VariablesAndPlaceholders.md)
+ - [Variables and Placeholders](./docs/VariablesAndPlaceholders.md)
  - [Condition Expressions](./docs/Conditions.md)
 
  - [API Documentation](./docs/API.md)
@@ -534,7 +557,7 @@ AwesomeConfig ships with a set of examples for your reference.
 
  - [Adding Files](./examples/AddFiles): An example of using AwesomeConfig with Confiuration Files.
 
- - [Adding Directories](./examples/AddDirectories): An example of using AwesomeConfig with a directory of configuration.
+ - [Adding Directories](./examples/AddDirectory): An example of using AwesomeConfig with a directory of configuration.
 
  - [Variables, Placeholders, and Conditions](./examples/VarsPlaceholdersConditions): An example of using AwesomeConfig variables, placeholders and conditions.
 

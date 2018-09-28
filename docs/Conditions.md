@@ -1,4 +1,4 @@
-# [AwesomeConfig](../README.md) > Conditions
+# [AwesomeConfig](../README.md) > Condition Expressions
 
 Conditions describe certain criteria that must be met in order for the configuration it applies to to be included when merged (during `config().start()`). Conditions can be applied as the second argument of `config().add()` or they can be used inline in the AwesomeConfig Configuration Notation (see [Configuration Notation](./docs/README.md#configuration-notation)).
 
