@@ -311,7 +311,7 @@ class AwesomeConfigProxy {
 	 */
 	reset() {
 		if (!this.instance) throw new Error("init() must be called before reset().");
-		if (!this.started) throw new Error("stop() must be called before reset().");
+		if (this.started) throw new Error("stop() must be called before reset().");
 		this.instance.reset();
 		return this;
 	}
