@@ -71,7 +71,7 @@ describe("Config",function(){
 		});
 	});
 
-	it("add string",function(){
+	it("add notation string",function(){
 		config().add(`
 
 			// this is some config
@@ -82,6 +82,15 @@ describe("Config",function(){
 
 			# asdf sd
 		`);
+		config().start();
+		assert.strictEqual(Object.keys(config).length,3);
+		assert.strictEqual(config.one,1);
+		assert.strictEqual(config.two,2);
+		assert.strictEqual(config.three.four,34);
+	});
+
+	it("add json string",function(){
+		config().add('{"one":1,"two":2,"three":{"four":34}}');
 		config().start();
 		assert.strictEqual(Object.keys(config).length,3);
 		assert.strictEqual(config.one,1);
