@@ -2,15 +2,8 @@
 
 "use strict";
 
+const AwesomeUtils = require("@awesomeeng/awesome-utils");
 const Log = require("@awesomeeng/awesome-log");
-Log.init({
-	writers: [{
-		type: "null",
-		name: "null"
-	}],
-	disableLoggingNotices: true
-});
-Log.start();
 
 const ConfigInstance = require("./ConfigInstance");
 
@@ -118,6 +111,9 @@ class AwesomeConfigProxy {
 			if (!me.instance) return undefined;
 			if (!me.instance.started) return undefined;
 			if (!me.instance.config) return undefined;
+
+			if (prop==="toString" || prop==="toJSON") return toJSON;
+
 			if (me.instance.config[prop]===undefined) throw new Error("Missing configuration property '"+prop+"'.");
 			return me.instance.config[prop];
 		};
@@ -143,6 +139,10 @@ class AwesomeConfigProxy {
 			if (!me.instance.started) return ["prototype"];
 
 			return [].concat(Object.getOwnPropertyNames(me.instance.config),["prototype"]);
+		};
+
+		const toJSON = function toJSON() {
+			return AwesomeUtils.Object.extend({},me.instance.config);
 		};
 
 		let config = function config(target,thisArg,args) {
