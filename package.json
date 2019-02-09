@@ -11,8 +11,8 @@
     "node": ">=10.5.0"
   },
   "dependencies": {
-    "@awesomeeng/awesome-log": "^2.1.0",
-    "@awesomeeng/awesome-utils": "^1.2.0"
+    "@awesomeeng/awesome-log": "^3.0.2",
+    "@awesomeeng/awesome-utils": "^1.4.7"
   },
   "devDependencies": {
     "jsdoc-to-markdown": "*",
@@ -20,8 +20,10 @@
   },
   "optionalDependencies": {},
   "scripts": {
+    "lint": "eslint src examples test",
     "docs": "jsdoc2md src/** --separators > docs/API.md",
-	"tests": "mocha test"
+    "test": "mocha test",
+    "tests": "mocha test"
   },
   "description": "AwesomeConfig is a powerful configuration system for building enterprise ready node.js application. It provides a unified transparent configuration object to your application based on configuration files or objects that you define.  It includes support for conditional configuration based on external values like environment variables, hostname, or OS; variables to reference one part of your configuration from another; and lots more.",
   "directories": {
