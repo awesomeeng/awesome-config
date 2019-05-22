@@ -159,10 +159,10 @@ That's the basics of AwesomeConfig, but there is of course a lot more to it.
 
 At this point, we suggest you check the [project readme](https://github.com/awesomeeng/awesome-config) out. Additionally there is specific documentation for Variables and Placeholders, Conditions, and the like.
 
-- [Understanding Merging](https://github.com/awesomeeng/awesome-config)
-- [Understanding Merging](https://github.com/awesomeeng/awesome-config/blob/master/docs/Merging.md)
-- [Variables and Placeholders](https://github.com/awesomeeng/awesome-config/blob/master/docs/VariablesAndPlaceholders.md)
-- [Condition Expressions](https://github.com/awesomeeng/awesome-config/blob/master/docs/Conditions.md)
+ - [Read Me First!](https://github.com/awesomeeng/awesome-config)
+ - [Understanding Merging](https://github.com/awesomeeng/awesome-config/blob/master/docs/Merging.md)
+ - [Variables and Placeholders](https://github.com/awesomeeng/awesome-config/blob/master/docs/VariablesAndPlaceholders.md)
+ - [Condition Expressions](https://github.com/awesomeeng/awesome-config/blob/master/docs/Conditions.md)
 
 ## AwesomeStack
 
@@ -178,6 +178,6 @@ AwesomeStack includes...
 
  - **[AwesomeCLI](https://github.com/awesomeeng/awesome-cli)** - Rapidly implement Command Line Interfaces (CLI) for your application.
 
-All AwesomeStack libraries and AwesomeStack itself is completely free and open source (MIT license), maintained by The Awesome Engineering Company, and has zero external dependencies. This means you can have confidence in your stack and not spend time worrying about licensing and code changing out from under your.
+All AwesomeStack libraries and AwesomeStack itself is completely free and open source (MIT license) and has zero external dependencies. This means you can have confidence in your stack and not spend time worrying about licensing and code changing out from under you. Additionally, AwesomeStack and all of is components are maintained by The Awesome Engineering Company ensuring you a single point of contact and responsibility and unified support for your entire application.
 
 You can learn more about AwesomeStack here: https://github.com/awesomeeng/awesome-stack
