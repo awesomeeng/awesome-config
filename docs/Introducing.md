@@ -1,6 +1,6 @@
 # [AwesomeConfig](../README.md) > Introducing AwesomeConfig
 
-AwesomeConfig is a powerful configuration system for building enterprise ready node.js application. It provides a unified, transparent configuration object to your application based on configuration files or objects that you define.  It includes support for conditional configuration based on external values like environment variables, hostname, or OS; variables to reference one part of your configuration from another; and lots more.
+AwesomeConfig is a powerful configuration system for building enterprise ready node.js applications. It provides a unified, transparent configuration object to your application based on configuration files or objects that you define.  It includes support for conditional configuration based on external values like environment variables, hostname, or OS; variables to reference one part of your configuration from another; and lots more.
 
 You simply add configuration to AwesomeConfig and start AwesomeConfig and then you are good to start using your configuration anywhere in your code. No configuration object to pass around, no mutations to worry about.
 
@@ -32,7 +32,7 @@ Additionally, AwesomeConfig offers some really interesting features that can mak
 
  - **No External Dependencies**. AwesomeConfig is written and maintained by The Awesome Engineering Company and has no dependency that was not written by us. This means consistency of code throughout the product and that we have zero dependencies that were not written inhouse.  This means safer code for you and your product.
 
- - **Free and Open**. AwesomeConfig is released under the MIT licenes and complete free to use and modify.
+ - **Free and Open**. AwesomeConfig is released under the MIT licene and complete free to use and modify.
 
 ## Getting Started
 
@@ -175,8 +175,6 @@ AwesomeStack includes...
  - **[AwesomeLog](https://github.com/awesomeeng/awesome-log)** - Performant Logging for your application needs.
 
  - **[AwesomeConfig](https://github.com/awesomeeng/awesome-config)** - Powerful configuration for your application.
-
- - **[AwesomeChannel](https://github.com/awesomeeng/awesome-channel)** - An inter-process and inter-server communication layer for your application.
 
  - **[AwesomeCLI](https://github.com/awesomeeng/awesome-cli)** - Rapidly implement Command Line Interfaces (CLI) for your application.
 
