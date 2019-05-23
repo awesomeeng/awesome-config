@@ -6,7 +6,7 @@ Simply add configuration objects or files to AwesomeConfig and start using your 
 
 Of course, there is a lot more to it then that.  Internally, AwesomeConfig takes all your configuration blocks (from objects, files, directories, etc.) and merges them together to provide a single, unified, immutable configuration object.  This object is essentially a plain javascript object that is exposed directly as AwesomeConfig and thus globally available simply by requiring AwesomeConfig.
 
-Additionally, AwesomeConfig offers some really interesting features that can make your configuration really shine: Variables allow you reference one part of your configuration from another part of you configuration; Conditions allow you to include or exclude sections of configuration depending on external items like environment varaibles, hostnames, OS type, etc.; Placeholders let you flag some variables to be required before the system can properly start forcing downstream users to provide the details. Altogether variables, conditions, and placeholders allow you to write highly flexible, detailed configuration for just about any project need.
+Additionally, AwesomeConfig offers some really interesting features that can make your configuration really shine: Variables allow you reference one part of your configuration from another part of you configuration; Conditions allow you to include or exclude sections of configuration depending on external items like environment variables, hostnames, OS type, etc.; Placeholders let you flag some variables to be required before the system can properly start forcing downstream users to provide the details. Altogether variables, conditions, and placeholders allow you to write highly flexible, detailed configuration for just about any project need.
 
 ## Key Features
 
@@ -133,7 +133,7 @@ console.log(config.json.or.key.value); // "pairs"
 
 ## AwesomeConfig Notation
 
-AwesomeConfig supports configuration written as JSON or AwesomeConfig Notation.  And while you are perfectly free to use JSON as your configuration languange, you will quickly notice JSON's many shortcomings.  For example, JSON does not allow at all for comments within the JSON at all.
+AwesomeConfig supports configuration written as JSON or AwesomeConfig Notation.  And while you are perfectly free to use JSON as your configuration language, you will quickly notice JSON's many shortcomings.  For example, JSON does not allow at all for comments within the JSON at all.
 
 ```json
 {
@@ -171,7 +171,7 @@ a.d: "This is D"
 e = This is E
 ```
 
-AwesomeConfig Notation allows you to use JSON blocks or Key/Value pairs interchangably.  You can even have a key/value pair that equals JSON. Also, AwesomeConfig is much more forgiving than JSON, so if you forget a comma or quotes around a String, AwesomeConfig Notation still allows that.
+AwesomeConfig Notation allows you to use JSON blocks or Key/Value pairs interchangeably.  You can even have a key/value pair that equals JSON. Also, AwesomeConfig is much more forgiving than JSON, so if you forget a comma or quotes around a String, AwesomeConfig Notation still allows that.
 
 Want Comments? AwesomeConfig Notation support line comments with `//` or `#` or block comments with `/* ... comment ... */`.
 
@@ -194,7 +194,7 @@ d: ${a.b.c}
 
 When your configuration is started `d` would be equal to `"This is C"`.
 
-Variables work by copying the value at the path specified to the location where they are used.  If a variable is the entire string value where they are used, the type (boolean, number, string) is caried along with it.  If a variable is not an entire replacement, it is string concatenated with what is before.  A great example of variables in use is with URLs and hostnames:
+Variables work by copying the value at the path specified to the location where they are used.  If a variable is the entire string value where they are used, the type (boolean, number, string) is carried along with it.  If a variable is not an entire replacement, it is string concatenated with what is before.  A great example of variables in use is with URLs and hostnames:
 
 ```text
 http: {
