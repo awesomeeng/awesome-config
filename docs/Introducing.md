@@ -2,43 +2,43 @@
 
 AwesomeConfig is a powerful configuration system for building enterprise ready node.js applications. It provides a unified, transparent configuration object to your application based on configuration files or objects that you define.  It includes support for conditional configuration based on external values like environment variables, hostname, or OS; variables to reference one part of your configuration from another; and lots more.
 
-You simply add configuration to AwesomeConfig and start AwesomeConfig and then you are good to start using your configuration anywhere in your code. No configuration object to pass around, no mutations to worry about.
+Simply add configuration to AwesomeConfig and start AwesomeConfig, and start using your configuration anywhere in your code. No configuration object to pass around, no mutations to worry about.
 
-Internally, AwesomeConfig takes all your configuration parts (objects, files, directories, etc.) and merges them together to provide a single, unified, immutable configuration object.  This object is essentially a plain javascript object that is exposed directly as AwesomeConfig and thus globally available simply by requiring AwesomeConfig.
+Internally, AwesomeConfig takes all your configuration blocks (from objects, files, directories, etc.) and merges them together to provide a single, unified, immutable configuration object.  This object is essentially a plain javascript object that is exposed directly as AwesomeConfig and thus globally available simply by requiring AwesomeConfig.
 
-Additionally, AwesomeConfig offers some really interesting features that can make your configuration really shine: Variables allow you reference one part of your configuration from another path of you configuration; Conditions allow you to include or exclude sections of configuration depending on external items like environment varaibles, hostnames, OS type, etc.; Placeholders let you flag some variables to be required before the system can properly start forcing downstream users to provide the details. Altogether variables, conditions, and placeholders allow you to write highly flexible, detailed configuration for just about any project need.
+Additionally, AwesomeConfig offers some really interesting features that can make your configuration really shine: Variables allow you reference one part of your configuration from another part of you configuration; Conditions allow you to include or exclude sections of configuration depending on external items like environment varaibles, hostnames, OS type, etc.; Placeholders let you flag some variables to be required before the system can properly start forcing downstream users to provide the details. Altogether variables, conditions, and placeholders allow you to write highly flexible, detailed configuration for just about any project need.
 
 ## Key Features
 
- - **No Object to Pass**. Simply require AwesomeConfig once started and you have access to all the configuration data. No creating a configuration object and passing it from function to function.
+ - **No Object to Pass**. Once AwesomeConfig is started you have complete access to your configuration. Simply require AwesomeConfig and you can read to any and all configuration data. No creating a configuration object and passing it from function to function.
 
- - **A Single Unified View**. AwesomeConfig provides a single view of all yuour configuration data, no matter how many configuration objects, files, or directories you use.  This means you can keep your configuration separate and readable.
+ - **A Single Unified View**. AwesomeConfig provides a single view of all your configuration data, no matter how many configuration objects, files, or directories you use.  This means you can keep your configuration separate, readable, and maintainable.
 
  - **Immutable**. Once started the entire configuration becomes locked and immutable preventing code from accidentally changing it on the fly.
 
- - **Zero Reserved Words**. Most configuration systems have a set of reserved words that cannot be used in top level configuration. Words like "init" or "config".  AwesomeConfig doesn't do that. Because of how it is written and designed, any valid javascript value name can be used.
+ - **Zero Reserved Words**. Most configuration systems have a set of reserved words that cannot be used in top level configuration. Words like "init" or "config".  AwesomeConfig doesn't do that. Because of how it is written and designed, any valid javascript property name can be used.
 
- - **Multiple Sources**. Provide configuration as plain JavaScript objects, or as a filename for AwesomeConfig to load, or as a directory which AwesomeConfig will iterate and load any file that ends in `.cfg`. You can add as many configurations as you like before you start and AwesomeConfig will merge them all together for it's unified view.
+ - **Multiple Sources**. Provide configuration as plain JavaScript objects, or as a filename for AwesomeConfig to load, or as a directory which AwesomeConfig will iterate. You can add as many configurations as you like before you start and AwesomeConfig will merge them all together for it's unified view.
 
  - **Custom Notation**. You can configure using JavaScript objects, JSON, or using AwesomeConfig's custom notation.  AwesomeConfig's Custom Notation is JSON based (and supports JSON within it) but also allows for key/value pairs, comments, conditions, and a lot of other little niceties that JSON just cannot do.
 
  - **Variables**. Use a variable in one part of your configuration to copy the value from another part of the configuration. This is especially useful with multiple configuration sources, conditions, and placeholders.
 
- - **Conditions**. A Condition can mark a section of configuration as only applicable if the given condition is true.  This allows your to isolate parts of your configuration to apply only under certain circumstances.  Conditions can be based on environment variables, hostnames, OS type, number of CPUs, etc.
+ - **Conditions**. A Condition can mark a block of configuration as only applicable if the given condition is true.  This allows you to isolate parts of your configuration to apply only under certain circumstances.  Conditions can be based on environment variables, hostnames, OS type, number of CPUs, etc.
 
- - **Placeholders**. A placeholder marks a configuration value as to be provided later via variables or condition.  If you start AwesomeConfig after adding all your configuration and there remains any unresolved placeholders, AwesomeConfig will let you know.
+ - **Placeholders**. A placeholder marks a configuration value as being provided later via variables or conditions.  If you start AwesomeConfig after adding all your configuration and there remains any unresolved placeholders, AwesomeConfig will let you know.
 
- - **Namespace**. In some circumstances multiple configurations need to be used in a single application.  Namespaces provide the ability to create isolated instances of AwesomeConfig, but still have access to the configuration without having to pass a configuration object around.
+ - **Namespaces**. In some circumstances multiple configurations need to be used in a single application.  Namespaces provide the ability to create isolated instances of AwesomeConfig, but still have access to the configuration without having to pass a configuration object around.
 
- - **No External Dependencies**. AwesomeConfig is written and maintained by The Awesome Engineering Company and has no dependency that was not written by us. This means consistency of code throughout the product and that we have zero dependencies that were not written inhouse.  This means safer code for you and your product.
+ - **No External Dependencies**. AwesomeConfig is written and maintained by The Awesome Engineering Company and has no dependency that was not written by us. This means consistency of code throughout the product and that we have zero dependencies that were not written in-house.  This means safer code for you and your product.
 
- - **Free and Open**. AwesomeConfig is released under the MIT licene and complete free to use and modify.
+ - **Free and Open**. AwesomeConfig is released under the MIT License and complete free to use and modify.
 
 ## Getting Started
 
 AwesomeConfig is super easy to use.
 
-#### 1). Install It.
+#### 1). Install it.
 
 ```shell
 npm install @awesomeeng/awesome-config
@@ -56,7 +56,7 @@ let config = require("@awesomeeng/awesome-config");
 config().init();
 ```
 
-Those of you paying attention will notice that the `init()` function is called not on the config object, but on the execution of the config function as specified thus: `config()`.  This is the tricky to how AwesomeConfig gets around having reserved words.  It takes a minute to get used to, but it becomes pretty obvious if you forget and use `config.init()` by mistake.
+Those of you paying attention will notice that the `init()` function is called not on the config object, but on the execution of the config function as specified thus: `config()`.  This is the trick to how AwesomeConfig gets around having reserved words.  It takes a minute to get used to, but it becomes pretty obvious if you forget and use `config.init()` by mistake.
 
 #### 4). Add Configuration.
 ```javascript
@@ -84,7 +84,9 @@ config().add("./or-config-files.json");
 config().add("./or-config-directories");
 ```
 
-With `config().add()` you add one or more configuration blocks to AwesomeConfig.  A configuration block can be...
+With `config().add()` you add one or more configuration blocks to AwesomeConfig.
+
+A configuration block can be...
 
  - **A JavaScript object**
  ```javascript
@@ -132,14 +134,14 @@ You can call `config().add()` as many times as you want adding as many configura
 
 Again, you will notice that we are using `config()` instead of `config` when adding our configuration.  A good rule of thumb to remember is if you are calling a function on configuration like `init()` or `add()` or `start()`, you do it on the `config()` execution.
 
-#### 5). Start It.
+#### 5). Start it.
 ```javascript
 config().start();
 ```
 
-After all your configuration blocks have been added, you start AwesomeConfig.  Once `start()` is called your configuration merge together into a single unified view, all variables and conditions are resolved, and the entire unified configuration is made immutable.
+After all your configuration blocks have been added, you start AwesomeConfig.  Once `start()` is called your configuration merges together into a single unified view, all variables and conditions are resolved, and the entire unified configuration is made immutable.
 
-#### 6). Use It!
+#### 6). Use it!
 ```javascript
 console.log(config.a.javascript); // "Object"
 console.log(config.or.use.our.custom.notation); // "which allows"
@@ -166,11 +168,11 @@ At this point, we suggest you check the [project readme](https://github.com/awes
 
 ## AwesomeStack
 
-AwesomeStack is a free and open source set of libraries for rapidly building enterprise ready nodejs applications, of which, AwesomeConfig is one part.  Each library is written to provide a stable, performant, part of your application stack that can be used on its own, or part of the greater AwesomeStack setup.
+AwesomeConfig is one part of the free and open source set of libraries called AwesomeStack for rapidly building enterprise ready nodejs applications.  Each library is written to provide a stable, performant, part of your application stack that can be used on its own or as part of the greater AwesomeStack setup.
 
 AwesomeStack includes...
 
- - **[AwesomeServer](https://github.com/awesomeeng/awesome-server)** - A http/https/http2 API Server focused on implementing API end points.
+ - **[AwesomeServer](https://github.com/awesomeeng/awesome-server)** - A HTTP/HTTPS/HTTP2 API Server focused on implementing API endpoints.
 
  - **[AwesomeLog](https://github.com/awesomeeng/awesome-log)** - Performant Logging for your application needs.
 
