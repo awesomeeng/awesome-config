@@ -1,6 +1,6 @@
 # AwesomeConfig
 
-AwesomeConfig is a powerful configuration system for building enterprise ready node.js application. It provides a unified, transparent configuration object to your application based on configuration files or objects that you define.  It includes support for conditional configuration based on external values like environment variables, hostname, or OS; variables to reference one part of your configuration from another; and lots more.
+AwesomeConfig is a powerful configuration system for building enterprise node.js application. It provides a unified, transparent configuration object to your application based on configuration files or objects that you define.  It includes support for conditional configuration based on external values like environment variables, hostname, or OS; variables to reference one part of your configuration from another; and lots more.
 
 ## Features
 

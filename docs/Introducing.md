@@ -1,6 +1,6 @@
 # [AwesomeConfig](../README.md) > Introducing AwesomeConfig
 
-AwesomeConfig is a powerful configuration system for building enterprise ready node.js applications. It provides a unified, transparent configuration object to your application based on configuration files or objects that you define.  It includes support for conditional configuration based on external values like environment variables, hostname, or OS; variables to reference one part of your configuration from another; and lots more.
+AwesomeConfig is a powerful configuration system for building enterprise node.js applications. It provides a unified, transparent configuration object to your application based on configuration files or objects that you define.  It includes support for conditional configuration based on external values like environment variables, hostname, or OS; variables to reference one part of your configuration from another; and lots more.
 
 Simply add configuration objects or files to AwesomeConfig and start using your configuration anywhere in your code. No configuration object to pass around, no mutations to worry about. Everything in a nice single JavaScript object structure.
 
@@ -251,7 +251,7 @@ At this point, we suggest you check the [project readme](https://github.com/awes
 
 ## AwesomeStack
 
-AwesomeConfig is one part of the free and open source set of libraries called AwesomeStack for rapidly building enterprise ready nodejs applications.  Each library is written to provide a stable, performant, part of your application stack that can be used on its own or as part of the greater AwesomeStack setup.
+AwesomeConfig is one part of the free and open source set of libraries called AwesomeStack for rapidly building enterprise nodejs applications.  Each library is written to provide a stable, performant, part of your application stack that can be used on its own or as part of the greater AwesomeStack setup.
 
 AwesomeStack includes...
 
