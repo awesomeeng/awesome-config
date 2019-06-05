@@ -2,15 +2,15 @@
 
 AwesomeConfig is a powerful configuration system for building enterprise ready node.js applications. It provides a unified, transparent configuration object to your application based on configuration files or objects that you define.  It includes support for conditional configuration based on external values like environment variables, hostname, or OS; variables to reference one part of your configuration from another; and lots more.
 
-Simply add configuration to AwesomeConfig and start AwesomeConfig, and start using your configuration anywhere in your code. No configuration object to pass around, no mutations to worry about.
+Simply add configuration objects or files to AwesomeConfig and start using your configuration anywhere in your code. No configuration object to pass around, no mutations to worry about. Everything in a nice single JavaScript object structure.
 
-Internally, AwesomeConfig takes all your configuration blocks (from objects, files, directories, etc.) and merges them together to provide a single, unified, immutable configuration object.  This object is essentially a plain javascript object that is exposed directly as AwesomeConfig and thus globally available simply by requiring AwesomeConfig.
+Of course, there is a lot more to it then that.  Internally, AwesomeConfig takes all your configuration blocks (from objects, files, directories, etc.) and merges them together to provide a single, unified, immutable configuration object.  This object is essentially a plain javascript object that is exposed directly as AwesomeConfig and thus globally available simply by requiring AwesomeConfig.
 
-Additionally, AwesomeConfig offers some really interesting features that can make your configuration really shine: Variables allow you reference one part of your configuration from another part of you configuration; Conditions allow you to include or exclude sections of configuration depending on external items like environment varaibles, hostnames, OS type, etc.; Placeholders let you flag some variables to be required before the system can properly start forcing downstream users to provide the details. Altogether variables, conditions, and placeholders allow you to write highly flexible, detailed configuration for just about any project need.
+Additionally, AwesomeConfig offers some really interesting features that can make your configuration really shine: Variables allow you reference one part of your configuration from another part of you configuration; Conditions allow you to include or exclude sections of configuration depending on external items like environment variables, hostnames, OS type, etc.; Placeholders let you flag some variables to be required before the system can properly start forcing downstream users to provide the details. Altogether variables, conditions, and placeholders allow you to write highly flexible, detailed configuration for just about any project need.
 
 ## Key Features
 
- - **No Object to Pass**. Once AwesomeConfig is started you have complete access to your configuration. Simply require AwesomeConfig and you can read to any and all configuration data. No creating a configuration object and passing it from function to function.
+ - **No Object to Pass**. Once AwesomeConfig is started you have complete access to your configuration. Simply require AwesomeConfig and you can read any and all configuration data. No creating a configuration object and passing it from function to function, module to module, class to class.
 
  - **A Single Unified View**. AwesomeConfig provides a single view of all your configuration data, no matter how many configuration objects, files, or directories you use.  This means you can keep your configuration separate, readable, and maintainable.
 
@@ -18,7 +18,7 @@ Additionally, AwesomeConfig offers some really interesting features that can mak
 
  - **Zero Reserved Words**. Most configuration systems have a set of reserved words that cannot be used in top level configuration. Words like "init" or "config".  AwesomeConfig doesn't do that. Because of how it is written and designed, any valid javascript property name can be used.
 
- - **Multiple Sources**. Provide configuration as plain JavaScript objects, or as a filename for AwesomeConfig to load, or as a directory which AwesomeConfig will iterate. You can add as many configurations as you like before you start and AwesomeConfig will merge them all together for it's unified view.
+ - **Multiple Sources**. Provide configuration as a plain JavaScript object, or as a filename for AwesomeConfig to load, or as a directory which AwesomeConfig will iterate. You can add as many configurations as you like before you start and AwesomeConfig will merge them all together for an unified view.
 
  - **Custom Notation**. You can configure using JavaScript objects, JSON, or using AwesomeConfig's custom notation.  AwesomeConfig's Custom Notation is JSON based (and supports JSON within it) but also allows for key/value pairs, comments, conditions, and a lot of other little niceties that JSON just cannot do.
 
@@ -28,9 +28,9 @@ Additionally, AwesomeConfig offers some really interesting features that can mak
 
  - **Placeholders**. A placeholder marks a configuration value as being provided later via variables or conditions.  If you start AwesomeConfig after adding all your configuration and there remains any unresolved placeholders, AwesomeConfig will let you know.
 
- - **Namespaces**. In some circumstances multiple configurations need to be used in a single application.  Namespaces provide the ability to create isolated instances of AwesomeConfig, but still have access to the configuration without having to pass a configuration object around.
+ - **Namespaces**. In some circumstances separate configurations need to be used in a single application.  Namespaces provide the ability to create isolated instances of AwesomeConfig, but still have access to those configurations without having to pass a configuration object around.
 
- - **No External Dependencies**. AwesomeConfig is written and maintained by The Awesome Engineering Company and has no dependency that was not written by us. This means consistency of code throughout the product and that we have zero dependencies that were not written in-house.  This means safer code for you and your product.
+ - **No External Dependencies**. AwesomeConfig is written and maintained by The Awesome Engineering Company and has no dependency that was not written by us. This means consistency of code throughout the product and zero dependencies that were not written by us.  This means safer code and better support for you and your product.
 
  - **Free and Open**. AwesomeConfig is released under the MIT License and complete free to use and modify.
 
@@ -59,30 +59,6 @@ config().init();
 Those of you paying attention will notice that the `init()` function is called not on the config object, but on the execution of the config function as specified thus: `config()`.  This is the trick to how AwesomeConfig gets around having reserved words.  It takes a minute to get used to, but it becomes pretty obvious if you forget and use `config.init()` by mistake.
 
 #### 4). Add Configuration.
-```javascript
-config().add({
-	a: {
-		javascript: "Object"
-	}
-});
-config().add(`
-	"or": {
-		"a": {
-			"string": "of JSON"
-		}
-	}
-`);
-config().add(`
-	or.use.our.custom.notation: "which allows"
-	json.or: {
-		key: {
-			value: "pairs"
-		}
-	}
-`);
-config().add("./or-config-files.json");
-config().add("./or-config-directories");
-```
 
 With `config().add()` you add one or more configuration blocks to AwesomeConfig.
 
@@ -154,6 +130,113 @@ Additionally you can use it in any other module working in the same process:
 let config = require("@awesoemeng/awesome-config");
 console.log(config.json.or.key.value); // "pairs"
 ```
+
+## AwesomeConfig Notation
+
+AwesomeConfig supports configuration written as JSON or AwesomeConfig Notation.  And while you are perfectly free to use JSON as your configuration language, you will quickly notice JSON's many shortcomings.  For example, JSON does not allow at all for comments within the JSON at all.
+
+```json
+{
+	"a": {
+		"b": {
+			"c": "This is C"
+		},
+		"d": "This is D",
+	},
+	"e": {
+		"f": "This is F"
+	}
+}
+```
+
+Instead, consider using AwesomeConfig notation. You can use JSON just fine, but AwesomeConfig Notation also does so much more.
+
+```text
+/*
+	Add Comments to your config!
+ */
+
+// Use JSON
+{
+	"a": {
+		"b": {
+			"c": "This is C"
+		}
+	}
+}
+
+// or key/value pairs
+a.d: "This is D"
+
+e = This is E
+```
+
+AwesomeConfig Notation allows you to use JSON blocks or Key/Value pairs interchangeably.  You can even have a key/value pair that equals JSON. Also, AwesomeConfig is much more forgiving than JSON, so if you forget a comma or quotes around a String, AwesomeConfig Notation still allows that.
+
+Want Comments? AwesomeConfig Notation support line comments with `//` or `#` or block comments with `/* ... comment ... */`.
+
+AwesomeConfig also allows for Conditions which allow you to specify certain conditions under which a section of configuration would apply.  More on that in a second.
+
+## Variables
+
+One particularly unique point to AwesomeConfig (both JSON and AwesomeConfig Notation) is it allows the use of Variables to reference one part of configuration from another part of the configuration. Variables can be used in JSON or AwesomeConfig Notation.
+
+A Variable has the form `${path}` where `path` is the dot notation path to the other part of config you want to reference.  For example, if you had a configuration like:
+
+```text
+a:  {
+	b: {
+		c: "This is C"
+	}
+}
+d: ${a.b.c}
+```
+
+When your configuration is started `d` would be equal to `"This is C"`.
+
+Variables work by copying the value at the path specified to the location where they are used.  If a variable is the entire string value where they are used, the type (boolean, number, string) is carried along with it.  If a variable is not an entire replacement, it is string concatenated with what is before.  A great example of variables in use is with URLs and hostnames:
+
+```text
+http: {
+	hostname: "localhost",
+	port: 4000
+	path: "/test",
+	url: "http://${http.hostname}:${http.port}${http.path}"
+}
+```
+
+In the case of `http.url` the resulting value is a concatenation of `http.hostname`, `http.port`, and `http.path`, resulting in a single URL string.
+
+## Conditions
+
+Conditions, particularly when used with AwesomeConfig Notation and Variables provide a means to selectively apply a configuration based on some external state, like an environment variable, hostname, date, etc.
+
+Here's an example:
+
+```text
+http: {
+	hostname: ${hostname},
+	port: ${port}
+	path: "/test",
+	url: "http://${http.hostname}:${http.port}${http.path}"
+}
+
+[env.executionEnviron=="development" or env.executionEnviron==""]
+hostname: localhost
+port: 4000
+
+[env.executionEnviron=="test"]
+hostname: test.awesomeneg.com
+port: 8080
+
+[env.executionEnviron=="development"]
+hostname: awesomeeng.com
+port: 80
+```
+
+In the above example, the value of the environment variable `executionEnviron` drives how the configuration is applied.  The `hostname` and `port` of the application changes based on this environment value, thus allowing the `http.url` to in turn change.
+
+From this brief example, one can really see how powerful conditions can be, especially when coupled with variables. They give you a flexibility that no other configuration system has ever even tried, the ability to change your configuration without relying on complex code.
 
 ## Documentation
 
