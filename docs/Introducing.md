@@ -30,7 +30,7 @@ Additionally, AwesomeConfig offers some really interesting features that can mak
 
  - **Namespaces**. In some circumstances separate configurations need to be used in a single application.  Namespaces provide the ability to create isolated instances of AwesomeConfig, but still have access to those configurations without having to pass a configuration object around.
 
- - **No External Dependencies**. AwesomeConfig is written and maintained by The Awesome Engineering Company and has no dependency that was not written by us. This means consistency of code throughout the product and zero dependencies that were not written by us.  This means safer code and better support for you and your product.
+ - **No External Dependencies**. AwesomeConfig is written and maintained by The Awesome Engineering Company and has no runtime dependency that was not written by us. This means consistency of code throughout the product, safer code, and better support for you and your product.
 
  - **Free and Open**. AwesomeConfig is released under the MIT License and complete free to use and modify.
 
@@ -263,6 +263,6 @@ AwesomeStack includes...
 
  - **[AwesomeCLI](https://github.com/awesomeeng/awesome-cli)** - Rapidly implement Command Line Interfaces (CLI) for your application.
 
-All AwesomeStack libraries and AwesomeStack itself is completely free and open source (MIT license) and has zero external dependencies. This means you can have confidence in your stack and not spend time worrying about licensing and code changing out from under you. Additionally, AwesomeStack and all of is components are maintained by The Awesome Engineering Company ensuring you a single point of contact and responsibility and unified support for your entire application.
+All AwesomeStack libraries and AwesomeStack itself is completely free and open source (MIT license) and has zero external dependencies. This means you can have confidence in your stack and not spend time worrying about licensing and code changing out from under you. Additionally, AwesomeStack and This means consistency of code throughout the product, safer code, and better support for you and your product. are maintained by The Awesome Engineering Company ensuring you a single point of contact and responsibility and unified support for your entire application.
 
 You can learn more about AwesomeStack here: https://github.com/awesomeeng/awesome-stack
