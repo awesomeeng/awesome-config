@@ -6,7 +6,7 @@
 <br/><a href="https://nodejs.org/en/">![node](https://img.shields.io/node/v/@awesomeeng/awesome-config.svg "NodeJS")</a>
 <a href="https://github.com/awesomeeng/awesome-config/issues">![GitHub issues](https://img.shields.io/github/issues/awesomeeng/awesome-config.svg "Github Issues")</a>
 <a href="https://snyk.io/vuln/search?type=npm&q=@awesomeeng/awesome-config">![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/awesomeeng/awesome-config.svg "Synk Vulnerabilities Database")</a>
-<a href="https://libraries.io/npm/@awesomeeng/awesome-config">![Libraries.io dependency status for latest release](https://img.shields.io/librariesio/release/npm/@awesomeeng/awesome-config.svg "Libraries.io Page")</a>
+<a href="https://www.npmjs.com/package/@awesomeeng/awesome-config">![David](https://img.shields.io/david/awesomeeng/awesome-config.svg)</a>
 
 # AwesomeConfig
 
