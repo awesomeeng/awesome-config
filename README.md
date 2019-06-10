@@ -1,3 +1,13 @@
+<a href="https://www.npmjs.com/package/@awesomeeng/awesome-config">![npm](https://img.shields.io/npm/v/@awesomeeng/awesome-config.svg "npm Details")</a>
+<a href="./LICENSE">![GitHub](https://img.shields.io/github/license/awesomeeng/awesome-config.svg "License Details")</a>
+<a href="http://npm-stats.com/~packages/@awesomeeng/awesome-config">![npm](https://img.shields.io/npm/dt/@awesomeeng/awesome-config.svg "npm download stats")</a>
+<a href="https://github.com/awesomeeng/awesome-config/graphs/contributors">![GitHub contributors](https://img.shields.io/github/contributors-anon/awesomeeng/awesome-config.svg "Github Contributors")</a>
+<a href="https://github.com/awesomeeng/awesome-config/commits/master">![GitHub last commit](https://img.shields.io/github/last-commit/awesomeeng/awesome-config.svg "Github Commit Log")</a>
+<br/><a href="https://nodejs.org/en/">![node](https://img.shields.io/node/v/@awesomeeng/awesome-config.svg "NodeJS")</a>
+<a href="https://github.com/awesomeeng/awesome-config/issues">![GitHub issues](https://img.shields.io/github/issues/awesomeeng/awesome-config.svg "Github Issues")</a>
+<a href="https://snyk.io/vuln/search?type=npm&q=@awesomeeng/awesome-config">![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/awesomeeng/awesome-config.svg "Synk Vulnerabilities Database")</a>
+<a href="https://libraries.io/npm/@awesomeeng/awesome-config">![Libraries.io dependency status for latest release](https://img.shields.io/librariesio/release/npm/@awesomeeng/awesome-config.svg "Libraries.io Page")</a>
+
 # AwesomeConfig
 
 AwesomeConfig is a powerful configuration system for building enterprise node.js application. It provides a unified, transparent configuration object to your application based on configuration files or objects that you define.  It includes support for conditional configuration based on external values like environment variables, hostname, or OS; variables to reference one part of your configuration from another; and lots more.
