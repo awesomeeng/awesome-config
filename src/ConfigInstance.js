@@ -198,6 +198,8 @@ class ConfigInstance {
 			valid = true;
 			origin = AwesomeUtils.VM.executionSourceAndLine(4);
 			sources = sources.concat([new ConfigSource(origin,content,defaultConditions)]);
+
+			Log.debug("Instance "+(this.id?this.id:"[default]")+" added configuration from origin "+origin+".");
 		}
 		else if (typeof content==="string") {
 			let resolved = resolve(content);
@@ -207,31 +209,37 @@ class ConfigInstance {
 				origin = AwesomeUtils.VM.executionSourceAndLine(4);
 				sources = sources.concat(this.parser.parse(origin,content,defaultConditions));
 				if (content) valid = true;
+
+				Log.debug("Instance "+(this.id?this.id:"[default]")+" added configuration from origin "+origin+".");
 			}
 			else if (stat && stat.isDirectory()) {
+				Log.debug("Instance "+(this.id?this.id:"[default]")+" looking for config in directory "+filename+".");
+
 				let dir = filename;
+				origin = filename;
 
 				let files = FS.readdirSync(dir);
+
 				files = files.sort();
 				files.forEach((filename)=>{
+					valid = true;
 					filename = Path.resolve(dir,filename);
 					if (filename.endsWith(".cfg")) this.add(filename,defaultConditions,encoding);
 				});
 				sources = [];
-				valid = true;
 			}
 			else if (stat && stat.isFile()) {
 				origin = filename;
 				content = FS.readFileSync(filename,encoding);
 				sources = sources.concat(this.parser.parse(origin,content,defaultConditions));
 				if (content) valid = true;
+
+				Log.debug("Instance "+(this.id?this.id:"[default]")+" added configuration from origin "+origin+".");
 			}
 		}
 		if (!valid) throw new Error("Invalid configuration content.");
 
 		this[$SOURCES] = this[$SOURCES].concat(sources);
-
-		Log.debug("Instance "+this.id+" added configuration from origin "+origin+".");
 	}
 }
 
@@ -259,6 +267,7 @@ const resolve = function resolve(filename) {
 	// try the filename relative to the module parent
 	if (module && module.parent) {
 		if (filename==="." || filename==="./" || filename==="/\\") path = Path.dirname(module && module.parent && module.parent.parent && module.parent.parent.filename || module && module.parent && module.parent.filename || filename);
+		else if (filename===".." || filename==="../") path = Path.dirname(Path.dirname(module && module.parent && module.parent.parent && module.parent.parent.filename || module && module.parent && module.parent.filename || filename));
 		else path = AwesomeUtils.Module.resolve(module && module.parent && module.parent.parent || module && module.parent,filename);
 		stat = getStat(path);
 		if (stat) return {
