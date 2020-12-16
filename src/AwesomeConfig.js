@@ -124,7 +124,7 @@ class AwesomeConfigProxy {
 
 		const getOwnPropertyDescriptor = function getOwnPropertyDescriptor(target,prop) {
 			// me resolve an error with ownKeys requiring a 'prototype' member.
-			if (prop==="prototype") return {value: null, writable: false, enumerable: false, configurable: false};
+			if (prop==="prototype") return {value: null, writable: true, enumerable: false, configurable: false};
 
 			if (!me.instance) return undefined;
 			if (!me.instance.started) return undefined;
@@ -300,6 +300,48 @@ class AwesomeConfigProxy {
 		if (this.instance.started) throw new Error("add() must be called before start().");
 		this.instance.add(content,defaultConditions,encoding);
 		return this;
+	}
+
+	/**
+	 * Returns true if config has the given key. Functionally equivelent to calling
+	 * `AwesomeConfig.x.y.z !== undefined`, except will not throw is `x`, or `y`, or `z`, 
+	 * does not exist.
+	 * 
+	 * @param {String} key 
+	 * @returns {Boolean}
+	 */
+	has(key) {
+		if (!this.instance) throw new Error("init() must be called before has().");
+		if (!this.started) throw new Error("start() must be called before has().");
+
+		return AwesomeUtils.Object.get(this.instance.config,key,undefined) !== undefined;
+	}
+
+	/**
+	 * Returns the config value for the given key. Does not throw if the given key 
+	 * does not exist, but instead returns the default value or undefined.
+	 * 
+	 * @param {String} key 
+	 * @param {*} defaultValue 
+	 * @returns {*}
+	 */
+	get(key, defaultValue = undefined) {
+		if (!this.instance) throw new Error("init() must be called before get().");
+		if (!this.started) throw new Error("start() must be called before get().");
+
+		return AwesomeUtils.Object.get(this.instance.config, key, defaultValue);
+	}
+
+	/**
+	 * Returns all of the keys in the given config. This is a deep function in that
+	 * it returns ALL of the keys and their children and so on. This does not 
+	 * @returns {String[]}
+	 */
+	keys(leafsOnly = false) {
+		if (!this.instance) throw new Error("init() must be called before keys().");
+		if (!this.started) throw new Error("start() must be called before keys().");
+
+		return AwesomeUtils.Object.paths(this.instance.config,null,leafsOnly);
 	}
 
 	/**

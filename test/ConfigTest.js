@@ -163,4 +163,56 @@ describe("Config",function(){
 		});
 		assert.strictEqual(config.one.two.three,123);
 	});
+
+	it("has", function(){
+		config().add({
+			one: {
+				two: {
+					three: 123
+				}
+			}
+		});
+		config().start();
+		
+		assert(config().has('one'));
+		assert(config().has('one.two'));
+		assert(config().has('one.two.three'));
+		assert(!config().has('zero'));
+		
+	});
+	
+	it("get", function(){
+		config().add({
+			one: {
+				two: {
+					three: 123
+				}
+			}
+		});
+		config().start();
+		
+		assert.strictEqual(config().get('one.two.three'),123);
+		assert.strictEqual(config().get('zero'),undefined);
+		assert.strictEqual(config().get('zero',456),456);
+	});
+	
+	it("keys", function(){
+		config().add({
+			one: {
+				two: {
+					three: 123
+				}
+			}
+		});
+		config().start();
+		
+		assert.deepStrictEqual(config().keys(),[
+			"one",
+			"one.two",
+			"one.two.three"
+		]);
+		assert.deepStrictEqual(config().keys(true),[
+			"one.two.three"
+		]);
+	});
 });
