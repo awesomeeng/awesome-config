@@ -35,7 +35,7 @@ class ConfigInstance {
 		this[$PARSER] = new ConfigParser();
 		this[$RESOLVER] = new ConfigResolver();
 
-		Log.debug("Instance "+id+" initialized.");
+		Log.debug("Instance " + (this.id ? this.id : "[default]")+" initialized.");
 	}
 
 	/**
@@ -122,7 +122,7 @@ class ConfigInstance {
 		// make our configuration.
 		this[$CONFIG] = root;
 
-		Log.debug("Instance "+this.id+" initialized.");
+		Log.debug("Instance "+(this.id?this.id:"[default]")+" initialized.");
 	}
 
 	/**
@@ -135,7 +135,7 @@ class ConfigInstance {
 		if (!this.started) return;
 
 		this[$CONFIG] = null;
-		Log.debug("Instance "+this.id+" stopped.");
+		Log.debug("Instance "+(this.id?this.id:"[default]")+" stopped.");
 	}
 
 	/**
