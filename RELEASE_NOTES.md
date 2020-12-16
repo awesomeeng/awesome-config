@@ -1,5 +1,14 @@
 # AwesomeConfig Release Notes
 
+#### **Version 1.1.0**
+
+ - Documentation updates.
+
+ - Adds several function sfor query configuration a little better:
+   - `config().has(key)` will return true if the given key exists.
+   - `config().get(key,defaultValue=undefined)` will return the value for the given key, or the provided defaults value or undefined.
+   - `config().keys(leafsOnly=false)` will returns all of the keys in the config.
+
 #### **Version 1.0.2**
 
  - Updating API docs.

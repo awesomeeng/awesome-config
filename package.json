@@ -1,6 +1,6 @@
 {
   "name": "@awesomeeng/awesome-config",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "author": "the awesome engineering company",
   "license": "MIT",
   "contributors": [
@@ -11,12 +11,12 @@
     "node": ">=10.5.0"
   },
   "dependencies": {
-    "@awesomeeng/awesome-log": "^3.0.2",
-    "@awesomeeng/awesome-utils": "^1.4.7"
+    "@awesomeeng/awesome-log": "^3.2.2",
+    "@awesomeeng/awesome-utils": "^1.5.1"
   },
   "devDependencies": {
-    "jsdoc-to-markdown": "*",
-    "mocha": "*"
+    "jsdoc-to-markdown": "^6.0.1",
+    "mocha": "^8.2.1"
   },
   "optionalDependencies": {},
   "scripts": {
