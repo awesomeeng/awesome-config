@@ -1,5 +1,9 @@
 # AwesomeConfig Release Notes
 
+#### **Version 1.1.1**
+
+ - Minor logging output issue fixed.
+
 #### **Version 1.1.0**
 
  - Documentation updates.
