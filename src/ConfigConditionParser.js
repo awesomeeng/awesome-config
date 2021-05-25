@@ -282,14 +282,14 @@ class ConditionParser extends AwesomeUtils.Parser.AbstractParser {
 			else if (!expression && next==="(") {
 				expression = this.parseGroup();
 			}
+			else if (expression && inGroup && next===")") {
+				break;
+			}
 			else if (expression && next===")") {
 				break;
 			}
 			else if (!expression) {
 				expression = this.parseField();
-			}
-			else if (expression && inGroup && next===")") {
-				break;
 			}
 			else {
 				this.error("Expected expression.");

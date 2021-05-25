@@ -82,10 +82,6 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 			else if (quoting && next===quoting) {
 				quoting = null;
 			}
-			else if (!quoting && next==="{") {
-				this.back();
-				next = this.popJSONText();
-			}
 			else if (!quoting && next==="[") {
 				this.back();
 				next = this.popArrayText();
@@ -129,10 +125,6 @@ class ConfigParser extends AwesomeUtils.Parser.AbstractParser {
 			else if (!quoting && next==="{") {
 				this.back();
 				next = this.popJSONText();
-			}
-			else if (!quoting && next==="[") {
-				this.back();
-				next = this.popArrayText();
 			}
 			else if (!quoting && (next==="#" || next2==="//" || next2==="/*")) {
 				this.back();
