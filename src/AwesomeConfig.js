@@ -113,12 +113,17 @@ class AwesomeConfigProxy {
 			if (!me.instance.config) return undefined;
 
 			if (prop==="toString" || prop==="toJSON") return toJSON;
+			if (prop==="__esModule") return me.instance.__esModule;
 
 			if (me.instance.config[prop]===undefined) throw new Error("Missing configuration property '"+prop+"'.");
 			return me.instance.config[prop];
 		};
 
-		const set = function set() {
+		const set = function set(target, prop,value) {
+			if (prop==="__esModule") {
+				me.instance.__esModule = value;
+				return true;
+			}
 			return false;
 		};
 
