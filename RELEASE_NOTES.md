@@ -1,5 +1,10 @@
 # AwesomeConfig Release Notes
 
+#### **Version 1.2.0**
+
+ - Address minor bug that may come up when using AwesomeConfig in typescript node modules.
+ - Cleaned up some linting errors that could potentially lead to some problems in parsing.
+
 #### **Version 1.1.1**
 
  - Minor logging output issue fixed.
