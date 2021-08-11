@@ -1,8 +1,12 @@
 # AwesomeConfig Release Notes
 
+#### **Version 1.3.0**
+
+ - Addresses a minor bug that was preventing the usage of special string (like env:BLAH or process:pid) from being used in variable substitution.
+
 #### **Version 1.2.0**
 
- - Address minor bug that may come up when using AwesomeConfig in typescript node modules.
+ - Addresses minor bug that may come up when using AwesomeConfig in typescript node modules.
  - Cleaned up some linting errors that could potentially lead to some problems in parsing.
 
 #### **Version 1.1.1**
