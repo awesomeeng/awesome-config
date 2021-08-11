@@ -3,6 +3,7 @@
 "use strict";
 
 const AwesomeUtils = require("@awesomeeng/awesome-utils");
+const SpecialStrings = require("./SpecialStrings");
 
 const $STACK = Symbol("stack");
 
@@ -32,13 +33,16 @@ class DefaultResolver {
 			while (true) {
 				if (typeof value!=="string") break;
 
-				let match = value.match(/\$\{([\w\d-_.$]+)\}/);
+				let match = value.match(/\$\{([\w\d-_.:$]+)\}/);
 				if (!match) break;
 
 				let start = match.index;
 				let end = match.index+match[0].length;
 				let variable = match[1];
-				let replacement = this.resolvePath(config,variable);
+
+				let replacement = undefined;
+				if (variable.includes(':')) replacement = SpecialStrings.resolve(variable);
+				else replacement = this.resolvePath(config,variable);
 				if (replacement===undefined) throw new Error("Invalid variable assignment '"+variable+"' at '"+path+"'.");
 
 				let resolved;
